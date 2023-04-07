@@ -1,8 +1,13 @@
 import { Router } from "express";
+import productsController from "../../controllers/products.controller";
+import { tryCatch } from "../../middlewares/tryCatch.middleware";
 
 const productsRouter: Router = Router();
 
-productsRouter.get("/");
+productsRouter.get(
+  "/",
+  tryCatch(productsController.getProducts.bind(productsController))
+);
 
 productsRouter.get("/:id");
 

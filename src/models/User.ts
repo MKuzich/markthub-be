@@ -32,7 +32,11 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
-  name: {
+  firstName: {
+    type: String,
+    required: true,
+  },
+  secondName: {
     type: String,
     required: true,
   },

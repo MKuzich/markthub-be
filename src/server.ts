@@ -2,12 +2,15 @@ import bodyParser from "body-parser";
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
+import morgan from "morgan";
 
 import AppRouter from "./routes";
 import connectDB from "./config/database";
 import { handleError } from "./middlewares/handleError.middleware";
 
 const app = express();
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+app.use(morgan(formatsLogger));
 app.use(cors());
 const router = new AppRouter(app);
 // Connect to MongoDB

@@ -1,7 +1,6 @@
 export interface IProduct {
   _id: string;
-  firstName: string;
-  secondName: string;
+  name: string;
   category: string;
   image?: string;
   price: number;
@@ -14,6 +13,17 @@ export interface IProduct {
   totalOrders: number;
   date: Date;
   reviews: string[];
+  quantity: number;
+}
+
+export interface IProductCreate {
+  name: string;
+  category: string;
+  image?: string;
+  price: number;
+  promoPrice?: number;
+  description: string;
+  owner: string;
   quantity: number;
 }
 
@@ -34,4 +44,11 @@ export interface IProductSent {
   product: string;
   quantity: number;
   price: number;
+}
+
+export interface IProductsQueryParams {
+  search: string;
+  filter: string;
+  page: number;
+  limit: number;
 }

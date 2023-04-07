@@ -4,11 +4,7 @@ import Joi from "joi";
 import { IProduct } from "../types/product.type";
 
 const productSchema = new Schema<IProduct>({
-  firstName: {
-    type: String,
-    required: true,
-  },
-  secondName: {
+  name: {
     type: String,
     required: true,
   },
