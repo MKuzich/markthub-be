@@ -9,12 +9,24 @@ productsRouter.get(
   tryCatch(productsController.getProducts.bind(productsController))
 );
 
-productsRouter.get("/:id");
+productsRouter.get(
+  "/:id",
+  tryCatch(productsController.getProductById.bind(productsController))
+);
 
-productsRouter.post("/");
+productsRouter.post(
+  "/",
+  tryCatch(productsController.addProduct.bind(productsController))
+);
 
-productsRouter.patch("/:id");
+productsRouter.patch(
+  "/:id",
+  tryCatch(productsController.changeProduct.bind(productsController))
+);
 
-productsRouter.delete("/:id");
+productsRouter.delete(
+  "/:id",
+  tryCatch(productsController.deleteProduct.bind(productsController))
+);
 
 export default productsRouter;

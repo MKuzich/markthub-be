@@ -27,6 +27,20 @@ export interface IProductCreate {
   quantity: number;
 }
 
+export interface IProductChange {
+  _id: string;
+  name?: string;
+  category?: string;
+  image?: string;
+  price?: number;
+  promoPrice?: number;
+  description?: string;
+  owner: string;
+  active?: boolean;
+  rate?: number;
+  quantity?: number;
+}
+
 export interface IProductOrdered {
   _id: string;
   name: string;

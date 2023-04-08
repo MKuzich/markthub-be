@@ -1,5 +1,9 @@
 import Product from "../models/Product";
-import { IProductCreate, IProduct } from "../types/product.type";
+import {
+  IProductCreate,
+  IProduct,
+  IProductChange,
+} from "../types/product.type";
 
 export default class ProductsService {
   async findAll(search: string, filter: string, skip: number, limit: number) {
@@ -18,5 +22,13 @@ export default class ProductsService {
     return data;
   }
 
-  async change(id: string, data);
+  async change(id: string, data: IProductChange) {
+    const product = await Product.findByIdAndUpdate(id, data, { new: true });
+    return product;
+  }
+
+  async delete(_id: string) {
+    const product = await Product.findByIdAndRemove({ _id });
+    return product;
+  }
 }
