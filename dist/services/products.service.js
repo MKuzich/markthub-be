@@ -85,6 +85,32 @@ var ProductsService = /** @class */ (function () {
             });
         });
     };
+    ProductsService.prototype.change = function (id, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var product;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Product_1.default.findByIdAndUpdate(id, data, { new: true })];
+                    case 1:
+                        product = _a.sent();
+                        return [2 /*return*/, product];
+                }
+            });
+        });
+    };
+    ProductsService.prototype.delete = function (_id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var product;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Product_1.default.findByIdAndRemove({ _id: _id })];
+                    case 1:
+                        product = _a.sent();
+                        return [2 /*return*/, product];
+                }
+            });
+        });
+    };
     return ProductsService;
 }());
 exports.default = ProductsService;

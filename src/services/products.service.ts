@@ -1,9 +1,5 @@
 import Product from "../models/Product";
-import {
-  IProductCreate,
-  IProduct,
-  IProductChange,
-} from "../types/product.type";
+import { IProductCreate, IProductChange } from "../types/product.type";
 
 export default class ProductsService {
   async findAll(search: string, filter: string, skip: number, limit: number) {

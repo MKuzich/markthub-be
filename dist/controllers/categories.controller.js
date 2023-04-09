@@ -39,90 +39,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var products_service_1 = __importDefault(require("../services/products.service"));
-var ProductsController = /** @class */ (function () {
-    function ProductsController(productsService) {
-        this.productsService = productsService;
+var categories_service_1 = __importDefault(require("../services/categories.service"));
+var CategoriesController = /** @class */ (function () {
+    function CategoriesController(categoriesService) {
+        this.categoriesService = categoriesService;
     }
-    ProductsController.prototype.getProducts = function (req) {
+    CategoriesController.prototype.getCategories = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, search, filter, _c, page, _d, limit, skip, data;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
-                    case 0:
-                        _a = req.query, _b = _a.search, search = _b === void 0 ? "" : _b, filter = _a.filter, _c = _a.page, page = _c === void 0 ? 1 : _c, _d = _a.limit, limit = _d === void 0 ? 10 : _d;
-                        skip = (page - 1) * limit;
-                        return [4 /*yield*/, this.productsService.findAll(search, filter, skip, limit)];
+            var data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.categoriesService.findAll()];
                     case 1:
-                        data = _e.sent();
+                        data = _a.sent();
                         return [2 /*return*/, data];
                 }
             });
         });
     };
-    ProductsController.prototype.getProductById = function (req) {
+    CategoriesController.prototype.addCategory = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, product;
+            var category, data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
-                        return [4 /*yield*/, this.productsService.findById(id)];
+                        category = req.body;
+                        return [4 /*yield*/, this.categoriesService.add(category)];
                     case 1:
-                        product = _a.sent();
-                        return [2 /*return*/, product];
+                        data = _a.sent();
+                        return [2 /*return*/, data];
                 }
             });
         });
     };
-    ProductsController.prototype.addProduct = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var data, product;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        data = req.body;
-                        return [4 /*yield*/, this.productsService.add(data)];
-                    case 1:
-                        product = _a.sent();
-                        return [2 /*return*/, product];
-                }
-            });
-        });
-    };
-    ProductsController.prototype.changeProduct = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, data, product;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        id = req.params.id;
-                        data = req.body;
-                        return [4 /*yield*/, this.productsService.change(id, data)];
-                    case 1:
-                        product = _a.sent();
-                        return [2 /*return*/, product];
-                }
-            });
-        });
-    };
-    ProductsController.prototype.deleteProduct = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, product;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        id = req.params.id;
-                        return [4 /*yield*/, this.productsService.delete(id)];
-                    case 1:
-                        product = _a.sent();
-                        return [2 /*return*/, product];
-                }
-            });
-        });
-    };
-    return ProductsController;
+    return CategoriesController;
 }());
-var productsController = new ProductsController(new products_service_1.default());
-exports.default = productsController;
-//# sourceMappingURL=products.controller.js.map
+var categoriesController = new CategoriesController(new categories_service_1.default());
+exports.default = categoriesController;
+//# sourceMappingURL=categories.controller.js.map

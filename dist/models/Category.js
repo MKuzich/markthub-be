@@ -10,7 +10,15 @@ var categorySchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    tag: {
+        type: String,
+        required: true,
+    },
+    image: {
+        type: String,
+        required: true,
+    },
 });
-var Category = (0, mongoose_1.model)("Categiry", categorySchema);
+var Category = (0, mongoose_1.model)("Category", categorySchema);
 exports.default = Category;
 //# sourceMappingURL=Category.js.map

@@ -1,15 +1,17 @@
 import { Router } from "express";
+import categoriesController from "../../controllers/categories.controller";
+import { tryCatch } from "../../middlewares/tryCatch.middleware";
 
 const categoriesRouter: Router = Router();
 
-categoriesRouter.get("/");
+categoriesRouter.get(
+  "/",
+  tryCatch(categoriesController.getCategories.bind(categoriesController))
+);
 
-categoriesRouter.get("/:id");
-
-categoriesRouter.post("/");
-
-categoriesRouter.patch("/:id");
-
-categoriesRouter.delete("/:id");
+categoriesRouter.post(
+  "/",
+  tryCatch(categoriesController.addCategory.bind(categoriesController))
+);
 
 export default categoriesRouter;
