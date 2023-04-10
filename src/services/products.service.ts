@@ -1,5 +1,8 @@
+import { v4 as uuidv4 } from "uuid";
+import { BlobServiceClient } from "@azure/storage-blob";
 import Product from "../models/Product";
 import { IProductCreate, IProductChange } from "../types/product.type";
+import { IFile } from "../types/file.type";
 
 export default class ProductsService {
   async findAll(search: string, filter: string, skip: number, limit: number) {
@@ -13,8 +16,27 @@ export default class ProductsService {
     return product;
   }
 
-  async add(product: IProductCreate) {
-    const data = await Product.create(product);
+  async add(product: IProductCreate, files: IFile[]) {
+    const newProduct = product;
+    const images: string[] = [];
+    const containerName = "product-photos";
+    const blobServiceClient = BlobServiceClient.fromConnectionString(
+      process.env.AZURE_STORAGE_CONNECTION_STRING!
+    );
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const uploads = files;
+    if (uploads && uploads.length > 0) {
+      for (const upload of uploads) {
+        const filename = uuidv4() + "-" + upload.originalname;
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.uploadData(upload.buffer, {
+          blobHTTPHeaders: { blobContentType: upload.mimetype },
+        });
+        images.push(blobClient.url);
+        newProduct.images = images;
+      }
+    }
+    const data = await Product.create(newProduct);
     return data;
   }
 

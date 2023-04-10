@@ -77,12 +77,20 @@ var ProductsController = /** @class */ (function () {
     };
     ProductsController.prototype.addProduct = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, product;
+            var data, images, fileArray, product;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         data = req.body;
-                        return [4 /*yield*/, this.productsService.add(data)];
+                        images = req.files;
+                        fileArray = [];
+                        if (Array.isArray(images)) {
+                            fileArray = images;
+                        }
+                        else if (typeof images === "object" && images !== null) {
+                            fileArray = Object.values(images).flat();
+                        }
+                        return [4 /*yield*/, this.productsService.add(data, fileArray)];
                     case 1:
                         product = _a.sent();
                         return [2 /*return*/, product];

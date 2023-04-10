@@ -11,10 +11,13 @@ const productSchema = new Schema<IProduct>({
   category: {
     type: String,
     ref: "Category",
+    required: true,
   },
-  image: {
-    type: String,
-  },
+  images: [
+    {
+      type: String,
+    },
+  ],
   price: {
     type: Number,
     required: true,

@@ -9,10 +9,13 @@ var productSchema = new mongoose_1.Schema({
     category: {
         type: String,
         ref: "Category",
+        required: true,
     },
-    image: {
-        type: String,
-    },
+    images: [
+        {
+            type: String,
+        },
+    ],
     price: {
         type: Number,
         required: true,

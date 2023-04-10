@@ -6,14 +6,17 @@ import {
   IProductCreate,
   IProductChange,
 } from "../types/product.type";
+import { IRequest } from "../types/request.type";
+import { IFile } from "../types/file.type";
 
 class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   async getProducts(
-    req: Request<any, any, any, IProductsQueryParams>
+    req: IRequest<any, IProductsQueryParams, any, any>
   ): Promise<{ products: IProduct[]; total: number }> {
     const { search = "", filter, page = 1, limit = 10 } = req.query;
+
     const skip = (page - 1) * limit;
     const data = await this.productsService.findAll(
       search,
@@ -30,9 +33,16 @@ class ProductsController {
     return product;
   }
 
-  async addProduct(req: Request<any, any, IProductCreate>) {
+  async addProduct(req: IRequest<IProductCreate, any, any, IFile[]>) {
     const data = req.body;
-    const product = await this.productsService.add(data);
+    const images = req.files;
+    let fileArray: Express.Multer.File[] = [];
+    if (Array.isArray(images)) {
+      fileArray = images;
+    } else if (typeof images === "object" && images !== null) {
+      fileArray = Object.values(images).flat();
+    }
+    const product = await this.productsService.add(data, fileArray);
     return product;
   }
 

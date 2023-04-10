@@ -8,6 +8,15 @@ const obj = {
   quantity: 10,
 };
 
+{
+	"name": "New name with file",
+	"category": "Electrinics",
+	"price": 1000,
+	"promoPrice": 800,
+	"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In vulputate eu est at fringilla. Vivamus facilisis hendrerit libero eu commodo. Duis elementum congue malesuada. Ut varius mauris eget diam maximus sollicitudin. Etiam gravida at risus eu imperdiet. Donec tristique elit id sapien tempor bibendum. Nullam a ligula eu erat congue laoreet. Duis faucibus tellus lectus, eget sodales justo pretium nec. Mauris ut bibendum odio.",
+	"quantity": 10
+}
+
 const obj1 = {
   name: "Electronics",
   tag: "electronics",

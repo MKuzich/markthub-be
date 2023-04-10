@@ -1,8 +1,10 @@
+import { ParamsDictionary } from "express-serve-static-core";
+
 export interface IProduct {
   _id: string;
   name: string;
   category: string;
-  image?: string;
+  images?: string[];
   price: number;
   promoPrice: number;
   description: string;
@@ -19,7 +21,7 @@ export interface IProduct {
 export interface IProductCreate {
   name: string;
   category: string;
-  image?: string;
+  images?: string[];
   price: number;
   promoPrice?: number;
   description: string;
@@ -31,7 +33,7 @@ export interface IProductChange {
   _id: string;
   name?: string;
   category?: string;
-  image?: string;
+  images?: string[];
   price?: number;
   promoPrice?: number;
   description?: string;
@@ -45,7 +47,7 @@ export interface IProductOrdered {
   _id: string;
   name: string;
   category: string;
-  image?: string;
+  images?: string[];
   price: number;
   promoPrice: number;
   owner: string;
@@ -60,9 +62,9 @@ export interface IProductSent {
   price: number;
 }
 
-export interface IProductsQueryParams {
+export interface IProductsQueryParams extends ParamsDictionary {
   search: string;
   filter: string;
-  page: number;
-  limit: number;
+  page: string;
+  limit: string;
 }

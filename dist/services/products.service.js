@@ -39,6 +39,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var uuid_1 = require("uuid");
+var storage_blob_1 = require("@azure/storage-blob");
 var Product_1 = __importDefault(require("../models/Product"));
 var ProductsService = /** @class */ (function () {
     function ProductsService() {
@@ -72,13 +74,39 @@ var ProductsService = /** @class */ (function () {
             });
         });
     };
-    ProductsService.prototype.add = function (product) {
+    ProductsService.prototype.add = function (product, files) {
         return __awaiter(this, void 0, void 0, function () {
-            var data;
+            var newProduct, images, containerName, blobServiceClient, containerClient, uploads, _i, uploads_1, upload, filename, blobClient, data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, Product_1.default.create(product)];
+                    case 0:
+                        newProduct = product;
+                        images = [];
+                        containerName = "product-photos";
+                        blobServiceClient = storage_blob_1.BlobServiceClient.fromConnectionString(process.env.AZURE_STORAGE_CONNECTION_STRING);
+                        containerClient = blobServiceClient.getContainerClient(containerName);
+                        uploads = files;
+                        if (!(uploads && uploads.length > 0)) return [3 /*break*/, 4];
+                        _i = 0, uploads_1 = uploads;
+                        _a.label = 1;
                     case 1:
+                        if (!(_i < uploads_1.length)) return [3 /*break*/, 4];
+                        upload = uploads_1[_i];
+                        filename = (0, uuid_1.v4)() + "-" + upload.originalname;
+                        blobClient = containerClient.getBlockBlobClient(filename);
+                        return [4 /*yield*/, blobClient.uploadData(upload.buffer, {
+                                blobHTTPHeaders: { blobContentType: upload.mimetype },
+                            })];
+                    case 2:
+                        _a.sent();
+                        images.push(blobClient.url);
+                        newProduct.images = images;
+                        _a.label = 3;
+                    case 3:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [4 /*yield*/, Product_1.default.create(newProduct)];
+                    case 5:
                         data = _a.sent();
                         return [2 /*return*/, data];
                 }
