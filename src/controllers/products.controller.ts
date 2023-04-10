@@ -4,7 +4,7 @@ import {
   IProduct,
   IProductsQueryParams,
   IProductCreate,
-  IProductChange,
+  IProductChangeData,
 } from "../types/product.type";
 import { IRequest } from "../types/request.type";
 import { IFile } from "../types/file.type";
@@ -46,7 +46,7 @@ class ProductsController {
     return product;
   }
 
-  async changeProduct(req: Request<{ id: string }, any, IProductChange>) {
+  async changeProduct(req: Request<{ id: string }, any, IProductChangeData>) {
     const { id } = req.params;
     const data = req.body;
     const product = await this.productsService.change(id, data);

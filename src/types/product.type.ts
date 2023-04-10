@@ -27,20 +27,23 @@ export interface IProductCreate {
   description: string;
   owner: string;
   quantity: number;
+  ordersPerDay?: number;
+  totalOrders?: number;
 }
 
-export interface IProductChange {
-  _id: string;
+export interface IProductChangeData {
   name?: string;
   category?: string;
   images?: string[];
   price?: number;
   promoPrice?: number;
   description?: string;
-  owner: string;
   active?: boolean;
   rate?: number;
+  reviews?: string[];
   quantity?: number;
+  ordersPerDay?: number;
+  totalOrders?: number;
 }
 
 export interface IProductOrdered {

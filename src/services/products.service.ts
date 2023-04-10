@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { BlobServiceClient } from "@azure/storage-blob";
 import Product from "../models/Product";
-import { IProductCreate, IProductChange } from "../types/product.type";
+import { IProductCreate, IProductChangeData } from "../types/product.type";
 import { IFile } from "../types/file.type";
 
 export default class ProductsService {
@@ -40,8 +40,9 @@ export default class ProductsService {
     return data;
   }
 
-  async change(id: string, data: IProductChange) {
+  async change(id: string, data: IProductChangeData) {
     const product = await Product.findByIdAndUpdate(id, data, { new: true });
+
     return product;
   }
 
