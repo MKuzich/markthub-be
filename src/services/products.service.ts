@@ -1,8 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 import { BlobServiceClient } from "@azure/storage-blob";
 import Product from "../models/Product";
-import { IProductCreate, IProductChangeData } from "../types/product.type";
+import {
+  IProductCreate,
+  IProductChangeData,
+  IProductsQuantity,
+} from "../types/product.type";
 import { IFile } from "../types/file.type";
+import { createError } from "../helpers/errors";
 
 export default class ProductsService {
   async findAll(search: string, filter: string, skip: number, limit: number) {
@@ -40,9 +45,47 @@ export default class ProductsService {
     return data;
   }
 
+  async changeQuantityAndOrders(products: IProductsQuantity[]) {
+    const selectedProducts = await Product.find({
+      $or: products.map(({ _id }) => {
+        return { _id };
+      }),
+    });
+
+    if (products.length !== selectedProducts.length) {
+      return createError(404, `All products not found.`);
+    }
+
+    const isNotEnoughQuantity = selectedProducts.some(
+      ({ _id, quantity }) =>
+        products.find((product) => product._id === _id.toString())!.amount >
+        quantity
+    );
+    if (isNotEnoughQuantity) {
+      return createError(400, `An insufficient amount of products at stock!`);
+    }
+
+    const changeProductsPromises = products.map(({ _id, amount }) => {
+      const selectedProduct = selectedProducts.find(
+        (product) => product._id.toString() === _id
+      )!;
+      return Product.findByIdAndUpdate(
+        _id,
+        {
+          quantity: selectedProduct.quantity - amount,
+          ordersPerDay: selectedProduct.ordersPerDay + amount,
+          totalOrders: selectedProduct.totalOrders + amount,
+        },
+        { new: true }
+      );
+    });
+
+    const orderedProducts = await Promise.all(changeProductsPromises);
+    return orderedProducts;
+  }
+
   async change(id: string, data: IProductChangeData) {
     const product = await Product.findByIdAndUpdate(id, data, { new: true });
-
     return product;
   }
 

@@ -31,6 +31,11 @@ export interface IProductCreate {
   totalOrders?: number;
 }
 
+export interface IProductsQuantity {
+  _id: string;
+  amount: number;
+}
+
 export interface IProductChangeData {
   name?: string;
   category?: string;
@@ -44,6 +49,11 @@ export interface IProductChangeData {
   quantity?: number;
   ordersPerDay?: number;
   totalOrders?: number;
+}
+
+export interface IProductChange {
+  action: string;
+  data: IProductChangeData;
 }
 
 export interface IProductOrdered {
