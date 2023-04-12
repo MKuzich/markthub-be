@@ -54,33 +54,27 @@ const userSchema = new Schema<IUser>({
   reviews: {
     type: [
       {
-        date: {
-          type: Date,
-          default: new Date(),
-        },
-        owner: {
-          type: String,
-          ref: "User",
-        },
-        title: {
-          type: String,
-          required: true,
-        },
-        text: {
-          type: String,
-          required: true,
-        },
-        rate: {
-          type: Number,
-          required: true,
-        },
+        type: String,
+        ref: "Review",
       },
     ],
     default: [],
   },
-  token: {
+  acessToken: {
     type: String,
     default: null,
+  },
+  refreshToken: {
+    type: String,
+    default: null,
+  },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, "Verify token is required"],
   },
 });
 

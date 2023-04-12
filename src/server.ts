@@ -8,6 +8,7 @@ import { updateOrdersPerDay } from "./helpers/updateOrdersPerDay";
 
 import AppRouter from "./routes";
 import connectDB from "./config/database";
+import "./config/passport";
 import { handleError } from "./middlewares/handleError.middleware";
 
 const app = express();
