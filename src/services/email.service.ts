@@ -19,7 +19,7 @@ export default class EmailService {
     this.transporter = nodemailer.createTransport(config);
   }
 
-  async sendEmail(email: string, verifyToken: string) {
+  async sendEmailVerify(email: string, verifyToken: string) {
     const verifyLink = `${BASE_URL}/api/auth/verify/${verifyToken}`;
     const emailOptions = {
       to: email,
@@ -28,5 +28,6 @@ export default class EmailService {
       html: `<h4>Click on this link to confirm registration on MarketHub shop ${verifyLink}</h4>`,
     };
     await this.transporter.sendMail(emailOptions);
+    return true;
   }
 }

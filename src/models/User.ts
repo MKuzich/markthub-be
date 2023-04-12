@@ -60,7 +60,7 @@ const userSchema = new Schema<IUser>({
     ],
     default: [],
   },
-  acessToken: {
+  accessToken: {
     type: String,
     default: null,
   },

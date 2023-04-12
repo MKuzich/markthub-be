@@ -10,7 +10,7 @@ export interface IUser extends Document {
   rate: number;
   date: Date;
   reviews: string[];
-  acessToken: string | null;
+  accessToken: string | null;
   _id: string;
   refreshToken: string | null;
   verify: boolean;
@@ -24,6 +24,12 @@ export interface IUserCreate {
   firstName: string;
   secondName: string;
   image: string;
+}
+
+export interface IUserLogIn {
+  phone?: string;
+  email?: string;
+  password: string;
 }
 
 export interface ITokenData {

@@ -11,11 +11,22 @@ authRouter.post(
   tryCatch(authController.signUpUser.bind(authController))
 );
 
-authRouter.post("/login");
+authRouter.post(
+  "/login",
+  tryCatch(authController.logInUser.bind(authController))
+);
 
 authRouter.post("/logout");
 
-authRouter.patch("/verify/:verificationToken");
+authRouter.patch(
+  "/verify/:verificationToken",
+  tryCatch(authController.verifyUser.bind(authController))
+);
+
+authRouter.patch(
+  "/verify/",
+  tryCatch(authController.reVerifyUser.bind(authController))
+);
 
 authRouter.patch("/:id");
 
