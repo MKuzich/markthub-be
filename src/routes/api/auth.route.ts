@@ -18,7 +18,7 @@ authRouter.post(
 
 authRouter.post("/logout");
 
-authRouter.patch(
+authRouter.get(
   "/verify/:verificationToken",
   tryCatch(authController.verifyUser.bind(authController))
 );

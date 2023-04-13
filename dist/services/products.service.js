@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var uuid_1 = require("uuid");
 var storage_blob_1 = require("@azure/storage-blob");
 var Product_1 = __importDefault(require("../models/Product"));
+var errors_1 = require("../helpers/errors");
 var ProductsService = /** @class */ (function () {
     function ProductsService() {
     }
@@ -109,6 +110,47 @@ var ProductsService = /** @class */ (function () {
                     case 5:
                         data = _a.sent();
                         return [2 /*return*/, data];
+                }
+            });
+        });
+    };
+    ProductsService.prototype.changeQuantityAndOrders = function (products) {
+        return __awaiter(this, void 0, void 0, function () {
+            var selectedProducts, isNotEnoughQuantity, changeProductsPromises, orderedProducts;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Product_1.default.find({
+                            $or: products.map(function (_a) {
+                                var _id = _a._id;
+                                return { _id: _id };
+                            }),
+                        })];
+                    case 1:
+                        selectedProducts = _a.sent();
+                        if (products.length !== selectedProducts.length) {
+                            return [2 /*return*/, (0, errors_1.createError)(404, "All products not found.")];
+                        }
+                        isNotEnoughQuantity = selectedProducts.some(function (_a) {
+                            var _id = _a._id, quantity = _a.quantity;
+                            return products.find(function (product) { return product._id === _id.toString(); }).amount >
+                                quantity;
+                        });
+                        if (isNotEnoughQuantity) {
+                            return [2 /*return*/, (0, errors_1.createError)(400, "An insufficient amount of products at stock!")];
+                        }
+                        changeProductsPromises = products.map(function (_a) {
+                            var _id = _a._id, amount = _a.amount;
+                            var selectedProduct = selectedProducts.find(function (product) { return product._id.toString() === _id; });
+                            return Product_1.default.findByIdAndUpdate(_id, {
+                                quantity: selectedProduct.quantity - amount,
+                                ordersPerDay: selectedProduct.ordersPerDay + amount,
+                                totalOrders: selectedProduct.totalOrders + amount,
+                            }, { new: true });
+                        });
+                        return [4 /*yield*/, Promise.all(changeProductsPromises)];
+                    case 2:
+                        orderedProducts = _a.sent();
+                        return [2 /*return*/, orderedProducts];
                 }
             });
         });

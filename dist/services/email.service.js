@@ -39,35 +39,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var passport_jwt_1 = require("passport-jwt");
-var passport_1 = __importDefault(require("passport"));
-var User_1 = __importDefault(require("../models/User"));
-var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET;
-var params = {
-    secretOrKey: ACCESS_TOKEN_SECRET,
-    jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+var nodemailer_1 = __importDefault(require("nodemailer"));
+var _a = process.env, MAIL = _a.MAIL, MAIL_PASSWORD = _a.MAIL_PASSWORD, BASE_URL = _a.BASE_URL;
+var config = {
+    host: "smtp.meta.ua",
+    port: 465,
+    secure: true,
+    auth: {
+        user: MAIL,
+        pass: MAIL_PASSWORD,
+    },
 };
-// JWT Strategy
-passport_1.default.use(new passport_jwt_1.Strategy(params, function (payload, done) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, User_1.default.findById(payload.id)];
-            case 1:
-                user = _a.sent();
-                if (!user) {
-                    return [2 /*return*/, done(null, false, { message: "User not found" })];
+var EmailService = /** @class */ (function () {
+    function EmailService() {
+        this.transporter = nodemailer_1.default.createTransport(config);
+    }
+    EmailService.prototype.sendEmailVerify = function (email, verifyToken) {
+        return __awaiter(this, void 0, void 0, function () {
+            var verifyLink, emailOptions;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        verifyLink = "".concat(BASE_URL, "/api/auth/verify/").concat(verifyToken);
+                        emailOptions = {
+                            to: email,
+                            from: MAIL,
+                            subject: "Confirm your email for MarketHub account",
+                            html: "<h4>Click on this link to confirm registration on MarketHub shop ".concat(verifyLink, "</h4>"),
+                        };
+                        return [4 /*yield*/, this.transporter.sendMail(emailOptions)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, true];
                 }
-                done(null, user);
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                done(err_1, false);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); }));
-//# sourceMappingURL=passport.js.map
+            });
+        });
+    };
+    return EmailService;
+}());
+exports.default = EmailService;
+//# sourceMappingURL=email.service.js.map

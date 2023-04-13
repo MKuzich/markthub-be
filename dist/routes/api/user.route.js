@@ -8,11 +8,11 @@ var User_1 = require("../../models/User");
 var user_controller_1 = __importDefault(require("../../controllers/user.controller"));
 var tryCatch_middleware_1 = require("../../middlewares/tryCatch.middleware");
 var validateRequest_middleware_1 = require("../../middlewares/validateRequest.middleware");
-var authValidate_1 = __importDefault(require("../../middlewares/authValidate"));
+var authValidate_middleware_1 = __importDefault(require("../../middlewares/authValidate.middleware"));
 var userRouter = (0, express_1.Router)();
-userRouter.post('/register', (0, validateRequest_middleware_1.validateRequest)(User_1.schemaSignUpUser), (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.register.bind(user_controller_1.default)));
-userRouter.post('/login', (0, validateRequest_middleware_1.validateRequest)(User_1.schemaSignUpUser), (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.logIn.bind(user_controller_1.default)));
-userRouter.post('/logout', authValidate_1.default, (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.logOut.bind(user_controller_1.default)));
-userRouter.patch('/', authValidate_1.default, (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.changePassword.bind(user_controller_1.default)));
+userRouter.post("/register", (0, validateRequest_middleware_1.validateRequest)(User_1.schemaSignUpUser), (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.register.bind(user_controller_1.default)));
+userRouter.post("/login", (0, validateRequest_middleware_1.validateRequest)(User_1.schemaSignUpUser), (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.logIn.bind(user_controller_1.default)));
+userRouter.post("/logout", authValidate_middleware_1.default, (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.logOut.bind(user_controller_1.default)));
+userRouter.patch("/", authValidate_middleware_1.default, (0, tryCatch_middleware_1.tryCatch)(user_controller_1.default.changePassword.bind(user_controller_1.default)));
 exports.default = userRouter;
 //# sourceMappingURL=user.route.js.map

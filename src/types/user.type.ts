@@ -23,7 +23,7 @@ export interface IUserCreate {
   password: string;
   firstName: string;
   secondName: string;
-  image: string;
+  image?: string;
 }
 
 export interface IUserLogIn {
@@ -42,4 +42,8 @@ export interface ITokenData {
 export interface IRefreshTokenData {
   userId: string;
   refreshToken: string;
+}
+
+export interface IUserTokenPayload {
+  id: string;
 }

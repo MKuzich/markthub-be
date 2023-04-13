@@ -39,35 +39,58 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var passport_jwt_1 = require("passport-jwt");
-var passport_1 = __importDefault(require("passport"));
-var User_1 = __importDefault(require("../models/User"));
-var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET;
-var params = {
-    secretOrKey: ACCESS_TOKEN_SECRET,
-    jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-};
-// JWT Strategy
-passport_1.default.use(new passport_jwt_1.Strategy(params, function (payload, done) { return __awaiter(void 0, void 0, void 0, function () {
-    var user, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+var auth_service_1 = __importDefault(require("../services/auth.service"));
+var errors_1 = require("../helpers/errors");
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var auth = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, authorization, _b, tokenType, token, user, err_1, refreshToken, _c, payload, newAccessToken, newRefreshToken, err_2;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, User_1.default.findById(payload.id)];
+                _a = req.headers.authorization, authorization = _a === void 0 ? "" : _a;
+                _b = authorization.split(" "), tokenType = _b[0], token = _b[1];
+                _d.label = 1;
             case 1:
-                user = _a.sent();
-                if (!user) {
-                    return [2 /*return*/, done(null, false, { message: "User not found" })];
+                _d.trys.push([1, 3, , 10]);
+                if (tokenType !== "Bearer" || !token) {
+                    next((0, errors_1.createError)(401, "Not authorized"));
                 }
-                done(null, user);
-                return [3 /*break*/, 3];
+                return [4 /*yield*/, auth_service_1.default.authenticate(token)];
             case 2:
-                err_1 = _a.sent();
-                done(err_1, false);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                user = _d.sent();
+                if (!user) {
+                    next((0, errors_1.createError)(401, "Not authorized"));
+                }
+                req.user = user;
+                next();
+                return [3 /*break*/, 10];
+            case 3:
+                err_1 = _d.sent();
+                if (!(err_1 instanceof jsonwebtoken_1.default.TokenExpiredError)) return [3 /*break*/, 8];
+                _d.label = 4;
+            case 4:
+                _d.trys.push([4, 6, , 7]);
+                refreshToken = req.cookies.refreshToken;
+                return [4 /*yield*/, auth_service_1.default.refresh(refreshToken, token)];
+            case 5:
+                _c = _d.sent(), payload = _c.payload, newAccessToken = _c.newAccessToken, newRefreshToken = _c.newRefreshToken;
+                req.user = payload;
+                res.cookie("refreshToken", newRefreshToken, { httpOnly: true });
+                res.setHeader("Authorization", "Bearer ".concat(newAccessToken));
+                next();
+                return [3 /*break*/, 7];
+            case 6:
+                err_2 = _d.sent();
+                next(err_2);
+                return [3 /*break*/, 7];
+            case 7: return [3 /*break*/, 9];
+            case 8:
+                next(err_1);
+                _d.label = 9;
+            case 9: return [3 /*break*/, 10];
+            case 10: return [2 /*return*/];
         }
     });
-}); }));
-//# sourceMappingURL=passport.js.map
+}); };
+exports.default = auth;
+//# sourceMappingURL=authValidate.middleware.js.map

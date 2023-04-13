@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/User";
-import { IUserCreate, IUserLogIn } from "../types/user.type";
+import { IUserCreate, IUserLogIn, IUserTokenPayload } from "../types/user.type";
 import { createError } from "../helpers/errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,7 +13,45 @@ const {
 } = process.env;
 
 export default class AuthService {
-  async authentificate() {}
+  static async authenticate(token: string) {
+    const { id } = jwt.verify(token, ACCESS_TOKEN_SECRET!) as IUserTokenPayload;
+
+    if (!id) {
+      throw createError(401, "Not authorized");
+    }
+    const user = await User.findById(id);
+    if (!user || !user.accessToken) {
+      throw createError(401, "Invalid token");
+    }
+    if (user.accessToken !== token) {
+      throw createError(401, "Bad credential");
+    }
+    return user;
+  }
+
+  static async refresh(refreshToken: string | undefined, accessToken: string) {
+    if (!refreshToken) {
+      const { id } = jwt.decode(accessToken) as JwtPayload;
+      await User.findByIdAndUpdate(id, {
+        accessToken: null,
+        refreshToken: null,
+      });
+      throw createError(401, "Refresh token is missing");
+    }
+
+    const payload = jwt.verify(
+      refreshToken,
+      REFRESH_TOKEN_SECRET!
+    ) as IUserTokenPayload;
+
+    const newAccessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET!, {
+      expiresIn: ACCESS_TOKEN_EXPIRATION_TIME,
+    });
+    const newRefreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET!, {
+      expiresIn: REFRESH_TOKEN_EXPIRATION_TIME,
+    });
+    return { payload, newAccessToken, newRefreshToken };
+  }
 
   async getUserByEmail(email: string) {
     const user = await User.findOne({ email });
@@ -43,6 +81,9 @@ export default class AuthService {
     const user = await User.findOne({ verificationToken });
     if (!user) {
       throw createError(404, "User not found.");
+    }
+    if (user.verify) {
+      throw createError(409, "User already verified.");
     }
     await User.findByIdAndUpdate(user._id, {
       verificationToken: null,
@@ -79,10 +120,16 @@ export default class AuthService {
     const refreshToken = await jwt.sign(payload, REFRESH_TOKEN_SECRET!, {
       expiresIn: REFRESH_TOKEN_EXPIRATION_TIME,
     });
-    const updatedUser = await User.findByIdAndUpdate(user._id, {
-      accessToken,
-      refreshToken,
-    });
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      {
+        accessToken,
+        refreshToken,
+      },
+      {
+        new: true,
+      }
+    );
     if (!updatedUser) {
       throw createError(500, "Tokens didnot create.");
     }

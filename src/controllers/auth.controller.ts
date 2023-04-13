@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { Request, Response } from "express";
 import AuthService from "../services/auth.service";
 import EmailService from "../services/email.service";
 import { createError } from "../helpers/errors";
@@ -47,10 +47,16 @@ export class AuthController {
     return isSent;
   }
 
-  async logInUser(req: Request) {
+  async logInUser(req: Request, res: Response) {
     const { body } = req;
     const { accessToken, refreshToken } = await this.authService.logIn(body);
-    return { accessToken, refreshToken };
+
+    console.log("accessToken:  ", accessToken);
+    console.log("refreshToken:  ", refreshToken);
+
+    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.setHeader("Authorization", `Bearer ${accessToken}`);
+    return;
   }
 
   async logOutUser() {}

@@ -8,7 +8,7 @@ var categories_route_1 = __importDefault(require("./api/categories.route"));
 var orders_route_1 = __importDefault(require("./api/orders.route"));
 var reviews_route_1 = __importDefault(require("./api/reviews.route"));
 var transactions_route_1 = __importDefault(require("./api/transactions.route"));
-var users_route_1 = __importDefault(require("./api/users.route"));
+var auth_route_1 = __importDefault(require("./api/auth.route"));
 var AppRouter = /** @class */ (function () {
     function AppRouter(app) {
         this.app = app;
@@ -22,7 +22,7 @@ var AppRouter = /** @class */ (function () {
         this.app.use("/api/orders", orders_route_1.default);
         this.app.use("/api/reviews", reviews_route_1.default);
         this.app.use("/api/transactions", transactions_route_1.default);
-        this.app.use("/api/users", users_route_1.default);
+        this.app.use("/api/auth", auth_route_1.default);
     };
     return AppRouter;
 }());

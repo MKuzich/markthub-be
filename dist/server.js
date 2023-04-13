@@ -12,6 +12,7 @@ var node_cron_1 = __importDefault(require("node-cron"));
 var updateOrdersPerDay_1 = require("./helpers/updateOrdersPerDay");
 var routes_1 = __importDefault(require("./routes"));
 var database_1 = __importDefault(require("./config/database"));
+require("./config/passport");
 var handleError_middleware_1 = require("./middlewares/handleError.middleware");
 var app = (0, express_1.default)();
 node_cron_1.default.schedule("0 0 * * *", updateOrdersPerDay_1.updateOrdersPerDay);

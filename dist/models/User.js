@@ -55,33 +55,27 @@ var userSchema = new mongoose_1.Schema({
     reviews: {
         type: [
             {
-                date: {
-                    type: Date,
-                    default: new Date(),
-                },
-                owner: {
-                    type: String,
-                    ref: "User",
-                },
-                title: {
-                    type: String,
-                    required: true,
-                },
-                text: {
-                    type: String,
-                    required: true,
-                },
-                rate: {
-                    type: Number,
-                    required: true,
-                },
+                type: String,
+                ref: "Review",
             },
         ],
         default: [],
     },
-    token: {
+    accessToken: {
         type: String,
         default: null,
+    },
+    refreshToken: {
+        type: String,
+        default: null,
+    },
+    verify: {
+        type: Boolean,
+        default: false,
+    },
+    verificationToken: {
+        type: String,
+        required: [true, "Verify token is required"],
     },
 });
 var User = (0, mongoose_1.model)("User", userSchema);
