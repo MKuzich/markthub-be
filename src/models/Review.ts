@@ -1,6 +1,6 @@
 import { Model, model, Schema } from "mongoose";
 
-import { IReview } from "src/types/review.type";
+import { IReview } from "../types/review.type";
 
 const reviewSchema = new Schema<IReview>({
   date: {

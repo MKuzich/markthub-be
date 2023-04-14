@@ -18,8 +18,8 @@ export default class ProductsService {
     return { products, total };
   }
 
-  async findById(_id: string) {
-    const product = await Product.findOne({ _id });
+  async findById(id: string) {
+    const product = await Product.findById(id);
     return product;
   }
 
