@@ -48,4 +48,16 @@ export default class EmailService {
     await this.transporter.sendMail(emailOptions);
     return true;
   }
+
+  async sendChangeEmail(email: string, emailChangeToken: string) {
+    const verifyLink = `${BASE_URL}/api/auth/verify/${emailChangeToken}`;
+    const emailOptions = {
+      to: email,
+      from: MAIL,
+      subject: "Confirm changening your email for MarketHub account",
+      html: `<h4>Click on this link to confirm changening email on MarketHub shop ${verifyLink}</h4>`,
+    };
+    await this.transporter.sendMail(emailOptions);
+    return true;
+  }
 }

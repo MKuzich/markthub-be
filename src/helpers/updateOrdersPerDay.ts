@@ -1,9 +1,10 @@
 import Product from "../models/Product";
+import { createError } from "./errors";
 
 export async function updateOrdersPerDay() {
-  const products = await Product.find();
-  products.forEach(async (product) => {
-    product.ordersPerDay = 0;
-    await product.save();
-  });
+  try {
+    await Product.updateMany({}, { ordersPerDay: 0 });
+  } catch (err) {
+    throw createError(500, "OrdersPerDay didn't update.");
+  }
 }

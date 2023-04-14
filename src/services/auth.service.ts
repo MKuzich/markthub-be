@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { BlobServiceClient } from "@azure/storage-blob";
 import crypto from "crypto";
 import User from "../models/User";
 import PasswordReset from "../models/PasswordReset";
@@ -8,9 +9,12 @@ import {
   IUserLogIn,
   IUserTokenPayload,
   IUserCookies,
+  IUserChangeData,
+  IUserChangePassword,
 } from "../types/user.type";
 import { createError } from "../helpers/errors";
 import { v4 as uuidv4 } from "uuid";
+import { IFile } from "../types/file.type";
 
 const {
   ACCESS_TOKEN_SECRET,
@@ -18,6 +22,7 @@ const {
   REFRESH_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRATION_TIME,
   ENCRYPTION_KEY,
+  AZURE_STORAGE_CONNECTION_STRING,
 } = process.env;
 
 export default class AuthService {
@@ -70,7 +75,58 @@ export default class AuthService {
     return user;
   }
 
-  async signUp(userData: IUserCreate) {
+  async verifyEmail(email: string, id: string) {
+    const user = await User.findOne({ email });
+    if (user) {
+      throw createError(409, "Email already in use.");
+    }
+    const emailChangeToken = uuidv4();
+    await User.findByIdAndUpdate(id, { emailChangeToken, newEmail: email });
+    return emailChangeToken;
+  }
+
+  async changeData(
+    id: string,
+    data: IUserChangeData,
+    file: IFile | null = null
+  ) {
+    const newUsersData = { ...data };
+
+    if (file) {
+      const containerName = "users";
+      const blobServiceClient = BlobServiceClient.fromConnectionString(
+        AZURE_STORAGE_CONNECTION_STRING!
+      );
+      const containerClient =
+        blobServiceClient.getContainerClient(containerName);
+      const upload = file;
+      if (upload) {
+        const filename = uuidv4() + "-" + upload.originalname;
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.uploadData(upload.buffer, {
+          blobHTTPHeaders: { blobContentType: upload.mimetype },
+        });
+        newUsersData.image = blobClient.url;
+
+        const user = await User.findById(id);
+        if (!user) {
+          throw createError(404, "User not found.");
+        }
+        if (user.image) {
+          const oldImageParts = user.image.split("/");
+          const oldImage = oldImageParts[oldImageParts.length - 1];
+
+          const oldBlobClient = containerClient.getBlockBlobClient(oldImage);
+          await oldBlobClient.delete();
+        }
+      }
+
+      await User.findByIdAndUpdate(id, newUsersData);
+      return true;
+    }
+  }
+
+  async signUp(userData: IUserCreate, file: IFile | null) {
     const { email, password } = userData;
     const userByEmail = await User.findOne({ email });
     if (userByEmail) {
@@ -78,11 +134,34 @@ export default class AuthService {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = uuidv4();
-    await User.create({
+
+    const newUser = {
       ...userData,
       password: hashedPassword,
       verificationToken,
-    });
+    };
+
+    if (file) {
+      const containerName = "users";
+      const blobServiceClient = BlobServiceClient.fromConnectionString(
+        AZURE_STORAGE_CONNECTION_STRING!
+      );
+      const containerClient =
+        blobServiceClient.getContainerClient(containerName);
+      const upload = file;
+      if (upload) {
+        const filename = uuidv4() + "-" + upload.originalname;
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.uploadData(upload.buffer, {
+          blobHTTPHeaders: { blobContentType: upload.mimetype },
+        });
+        newUser.image = blobClient.url;
+      }
+    } else {
+      newUser.image = null;
+    }
+
+    await User.create(newUser);
     return verificationToken;
   }
 
@@ -248,5 +327,36 @@ export default class AuthService {
     return true;
   }
 
-  async changePassword() {}
+  async resetEmail(emailChangeToken: string) {
+    const user = await User.findOne({ emailChangeToken });
+    if (!user) {
+      throw createError(404, "Token not found. Try again.");
+    }
+    const changedUser = await User.findByIdAndUpdate(
+      user._id,
+      { email: user.newEmail, emailChangeToken: null, newEmail: null },
+      { new: true }
+    );
+
+    return changedUser;
+  }
+
+  async changePassword(id: string, data: IUserChangePassword) {
+    const { newPassword, oldPassword } = data;
+
+    const user = await User.findById(id);
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordMatch) {
+      throw createError(401, "Invalid credentials.");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.findByIdAndUpdate(id, { password: hashedPassword });
+    return true;
+  }
 }

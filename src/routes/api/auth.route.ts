@@ -2,6 +2,7 @@ import { Router } from "express";
 import authController from "../../controllers/auth.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
 import auth from "../../middlewares/authValidate.middleware";
+import { parseAvatar } from "../../middlewares/parseFormData";
 
 const authRouter: Router = Router();
 
@@ -13,6 +14,7 @@ authRouter.get(
 
 authRouter.post(
   "/signup",
+  parseAvatar(),
   tryCatch(authController.signUpUser.bind(authController))
 );
 
@@ -38,8 +40,8 @@ authRouter.patch(
 );
 
 authRouter.patch(
-  "/changepassword",
-  tryCatch(authController.changeUserPassword.bind(authController))
+  "/forgot-password",
+  tryCatch(authController.changeForgottenUserPassword.bind(authController))
 );
 
 authRouter.post(
@@ -47,8 +49,29 @@ authRouter.post(
   tryCatch(authController.resetUserPassword.bind(authController))
 );
 
-authRouter.patch("/:id", auth); // change user's data
+authRouter.patch(
+  "/:id",
+  auth,
+  parseAvatar(),
+  tryCatch(authController.changeUserData.bind(authController))
+);
 
-authRouter.delete("/:id", auth); // delete user, we need this?
+authRouter.patch(
+  "/change-password",
+  auth,
+  tryCatch(authController.changeUserPassword.bind(authController))
+);
+
+authRouter.patch(
+  "/change-email",
+  auth,
+  tryCatch(authController.changeUserEmail.bind(authController))
+);
+
+authRouter.get(
+  "/reset-email/:emailChangeToken",
+  auth,
+  tryCatch(authController.resetUserEmail.bind(authController))
+);
 
 export default authRouter;

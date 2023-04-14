@@ -9,6 +9,8 @@ import {
 import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
 
+const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
+
 export default class ProductsService {
   async findAll(search: string, filter: string, skip: number, limit: number) {
     const products = await Product.find().skip(skip).limit(limit);
@@ -26,7 +28,7 @@ export default class ProductsService {
     const images: string[] = [];
     const containerName = "product-photos";
     const blobServiceClient = BlobServiceClient.fromConnectionString(
-      process.env.AZURE_STORAGE_CONNECTION_STRING!
+      AZURE_STORAGE_CONNECTION_STRING!
     );
     const containerClient = blobServiceClient.getContainerClient(containerName);
     const uploads = files;

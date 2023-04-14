@@ -12,7 +12,8 @@ export class AuthController {
 
   async signUpUser(req: Request) {
     const data = req.body;
-    const verificationToken = await this.authService.signUp(data);
+    const image = req.file ?? null;
+    const verificationToken = await this.authService.signUp(data, image);
     const isSent = await this.emailService.sendEmailVerify(
       data.email,
       verificationToken
@@ -38,6 +39,9 @@ export class AuthController {
       throw createError(400, "Missing required field email");
     }
     const user = await this.authService.getUserByEmail(email);
+    if (!user.verificationToken) {
+      throw createError(409, "No verification token in user data.");
+    }
     const isSent = await this.emailService.sendEmailVerify(
       email,
       user.verificationToken
@@ -76,7 +80,7 @@ export class AuthController {
     return isLogOuted;
   }
 
-  async changeUserPassword(req: Request) {
+  async changeForgottenUserPassword(req: Request) {
     const { email } = req.body;
     const user = await this.authService.getUserByEmail(email);
     const { encryptedToken, id } = await this.authService.createPasswordReset(
@@ -98,6 +102,40 @@ export class AuthController {
       newPassword,
       passwordId
     );
+    return isChanged;
+  }
+
+  async changeUserEmail(req: Request) {
+    const { email } = req.body;
+    const { id } = req.user as IUserTokenPayload;
+
+    const emailChangeToken = await this.authService.verifyEmail(email, id);
+    const isSent = await this.emailService.sendEmailVerify(
+      email,
+      emailChangeToken
+    );
+    return isSent;
+  }
+
+  async resetUserEmail(req: Request) {
+    const { emailChangeToken } = req.params;
+    const updatedUser = await this.authService.resetEmail(emailChangeToken);
+    return updatedUser;
+  }
+
+  async changeUserData(req: Request) {
+    const data = req.body;
+    const image = req.file ?? null;
+    const { id } = req.user as IUserTokenPayload;
+
+    const isChanged = await this.authService.changeData(id, data, image);
+    return isChanged;
+  }
+
+  async changeUserPassword(req: Request) {
+    const data = req.body;
+    const { id } = req.user as IUserTokenPayload;
+    const isChanged = await this.authService.changePassword(id, data);
     return isChanged;
   }
 }

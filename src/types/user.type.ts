@@ -6,7 +6,7 @@ export interface IUser extends Document {
   password: string;
   firstName: string;
   secondName: string;
-  image: string;
+  image: string | null;
   rate: number;
   date: Date;
   reviews: string[];
@@ -14,7 +14,9 @@ export interface IUser extends Document {
   _id: string;
   refreshToken: string | null;
   verify: boolean;
-  verificationToken: string;
+  verificationToken: string | null;
+  emailChangeToken: string | null;
+  newEmail: string | null;
 }
 
 export interface IUserCreate {
@@ -23,11 +25,20 @@ export interface IUserCreate {
   password: string;
   firstName: string;
   secondName: string;
-  image?: string;
+  image?: string | null;
+}
+
+export interface IUserChangeData {
+  phone: string;
+  email: string;
+  firstName: string;
+  secondName: string;
+  image: string | null;
 }
 
 export interface IUserChangePassword {
-  email: string;
+  newPassword: string;
+  oldPassword: string;
 }
 
 export interface IUserLogIn {

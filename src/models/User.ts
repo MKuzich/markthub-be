@@ -76,6 +76,14 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: [true, "Verify token is required"],
   },
+  emailChangeToken: {
+    type: String,
+    default: null,
+  },
+  newEmail: {
+    type: String,
+    default: null,
+  },
 });
 
 const User: Model<IUser> = model("User", userSchema);
