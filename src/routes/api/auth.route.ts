@@ -1,10 +1,15 @@
 import { Router } from "express";
 import authController from "../../controllers/auth.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
+import auth from "../../middlewares/authValidate.middleware";
 
 const authRouter: Router = Router();
 
-authRouter.get("/");
+authRouter.get(
+  "/current",
+  auth,
+  tryCatch(authController.getCurrentUser.bind(authController))
+);
 
 authRouter.post(
   "/signup",
@@ -16,7 +21,11 @@ authRouter.post(
   tryCatch(authController.logInUser.bind(authController))
 );
 
-authRouter.post("/logout");
+authRouter.get(
+  "/logout",
+  auth,
+  tryCatch(authController.logOutUser.bind(authController))
+);
 
 authRouter.get(
   "/verify/:verificationToken",
@@ -28,8 +37,18 @@ authRouter.patch(
   tryCatch(authController.reVerifyUser.bind(authController))
 );
 
-authRouter.patch("/:id");
+authRouter.patch(
+  "/changepassword",
+  tryCatch(authController.changeUserPassword.bind(authController))
+);
 
-authRouter.delete("/:id");
+authRouter.post(
+  "/reset-password/:resetToken/:passwordId",
+  tryCatch(authController.resetUserPassword.bind(authController))
+);
+
+authRouter.patch("/:id", auth); // change user's data
+
+authRouter.delete("/:id", auth); // delete user, we need this?
 
 export default authRouter;

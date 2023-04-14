@@ -121,8 +121,6 @@ var AuthController = /** @class */ (function () {
                         return [4 /*yield*/, this.authService.logIn(body)];
                     case 1:
                         _a = _b.sent(), accessToken = _a.accessToken, refreshToken = _a.refreshToken;
-                        console.log("accessToken:  ", accessToken);
-                        console.log("refreshToken:  ", refreshToken);
                         res.cookie("refreshToken", refreshToken, { httpOnly: true });
                         res.setHeader("Authorization", "Bearer ".concat(accessToken));
                         return [2 /*return*/];
@@ -130,15 +128,78 @@ var AuthController = /** @class */ (function () {
             });
         });
     };
-    AuthController.prototype.logOutUser = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
+    AuthController.prototype.getCurrentUser = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!req.user) {
+                            throw (0, errors_1.createError)(401, "Not authorized.");
+                        }
+                        id = req.user.id;
+                        return [4 /*yield*/, this.authService.getCurrent(id)];
+                    case 1:
+                        user = _a.sent();
+                        return [2 /*return*/, user];
+                }
+            });
+        });
     };
-    AuthController.prototype.changePassword = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
+    AuthController.prototype.logOutUser = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, isLogOuted;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!req.user) {
+                            throw (0, errors_1.createError)(401, "Not authorized.");
+                        }
+                        id = req.user.id;
+                        return [4 /*yield*/, this.authService.logOut(id)];
+                    case 1:
+                        isLogOuted = _a.sent();
+                        return [2 /*return*/, isLogOuted];
+                }
+            });
+        });
+    };
+    AuthController.prototype.changeUserPassword = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var email, user, token, isSent;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        email = req.body.email;
+                        return [4 /*yield*/, this.authService.getUserByEmail(email)];
+                    case 1:
+                        user = _a.sent();
+                        return [4 /*yield*/, this.authService.createPasswordReset(user._id)];
+                    case 2:
+                        token = _a.sent();
+                        return [4 /*yield*/, this.emailService.sendChangePassword(email, token)];
+                    case 3:
+                        isSent = _a.sent();
+                        return [2 /*return*/, isSent];
+                }
+            });
+        });
+    };
+    AuthController.prototype.resetUserPassword = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resetToken, newPassword, data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        resetToken = req.params.resetToken;
+                        newPassword = req.body.newPassword;
+                        return [4 /*yield*/, this.authService.resetPassword(resetToken, newPassword)];
+                    case 1:
+                        data = _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     return AuthController;
 }());

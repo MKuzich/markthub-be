@@ -1,7 +1,14 @@
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import crypto from "crypto";
 import User from "../models/User";
-import { IUserCreate, IUserLogIn, IUserTokenPayload } from "../types/user.type";
+import PasswordReset from "../models/PasswordReset";
+import {
+  IUserCreate,
+  IUserLogIn,
+  IUserTokenPayload,
+  IUserCookies,
+} from "../types/user.type";
 import { createError } from "../helpers/errors";
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,6 +17,7 @@ const {
   ACCESS_TOKEN_EXPIRATION_TIME,
   REFRESH_TOKEN_SECRET,
   REFRESH_TOKEN_EXPIRATION_TIME,
+  ENCRYPTION_KEY,
 } = process.env;
 
 export default class AuthService {
@@ -17,30 +25,31 @@ export default class AuthService {
     const { id } = jwt.verify(token, ACCESS_TOKEN_SECRET!) as IUserTokenPayload;
 
     if (!id) {
-      throw createError(401, "Not authorized");
+      throw createError(401, "Not authorized.");
     }
     const user = await User.findById(id);
     if (!user || !user.accessToken) {
-      throw createError(401, "Invalid token");
+      throw createError(401, "Invalid token.");
     }
     if (user.accessToken !== token) {
-      throw createError(401, "Bad credential");
+      throw createError(401, "Bad credential.");
     }
     return user;
   }
 
-  static async refresh(refreshToken: string | undefined, accessToken: string) {
-    if (!refreshToken) {
+  static async refresh(cookies: IUserCookies | undefined, accessToken: string) {
+    const token = cookies?.refreshToken;
+    if (!cookies || !token) {
       const { id } = jwt.decode(accessToken) as JwtPayload;
       await User.findByIdAndUpdate(id, {
         accessToken: null,
         refreshToken: null,
       });
-      throw createError(401, "Refresh token is missing");
+      throw createError(401, "Refresh token is missing.");
     }
 
     const payload = jwt.verify(
-      refreshToken,
+      token,
       REFRESH_TOKEN_SECRET!
     ) as IUserTokenPayload;
 
@@ -136,7 +145,108 @@ export default class AuthService {
     return updatedUser;
   }
 
-  async logOut() {}
+  async getCurrent(id: string) {
+    const user = await User.findById(id);
+    if (!user) {
+      throw createError(409, "Undefined user.");
+    }
+    const {
+      phone,
+      email,
+      firstName,
+      secondName,
+      image,
+      rate,
+      date,
+      reviews,
+      _id,
+    } = user;
+    return {
+      phone,
+      email,
+      firstName,
+      secondName,
+      image,
+      rate,
+      date,
+      reviews,
+      _id,
+    };
+  }
+
+  async logOut(id: string) {
+    await User.findByIdAndUpdate(id, {
+      accessToken: null,
+      refreshToken: null,
+    });
+    return true;
+  }
+
+  async createPasswordReset(id: string) {
+    const token = crypto.randomBytes(32).toString("hex");
+    const iv = crypto.randomBytes(16);
+
+    const cipher = crypto.createCipheriv("aes-256-cbc", ENCRYPTION_KEY!, iv);
+    let encryptedToken = cipher.update(token, "utf8", "base64");
+    encryptedToken += cipher.final("base64");
+
+    const createdPasswordReset = await PasswordReset.findOne({ user: id });
+    let newPasswordReset;
+    if (createdPasswordReset) {
+      newPasswordReset = await PasswordReset.findByIdAndUpdate(
+        createdPasswordReset._id,
+        {
+          token,
+          iv,
+        },
+        { new: true }
+      );
+    } else {
+      newPasswordReset = await PasswordReset.create({
+        user: id,
+        token,
+        iv,
+      });
+    }
+    if (!newPasswordReset) {
+      throw createError(500, "Cannot change password now");
+    }
+    return { encryptedToken, id: newPasswordReset._id };
+  }
+
+  async resetPassword(
+    encryptedToken: string,
+    newPassword: string,
+    passwordId: string
+  ) {
+    const passwordReset = await PasswordReset.findById(passwordId);
+    if (!passwordReset) {
+      throw createError(400, "Invalid or expired password reset token.");
+    }
+
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      ENCRYPTION_KEY!,
+      passwordReset.iv
+    );
+    let decryptedToken = decipher.update(encryptedToken, "base64", "utf8");
+    decryptedToken += decipher.final("utf8");
+
+    if (decryptedToken !== passwordReset.token) {
+      await PasswordReset.findByIdAndRemove(passwordId);
+      throw createError(400, "Invalid or expired token.");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.findByIdAndUpdate(passwordReset.user, {
+      password: hashedPassword,
+    });
+
+    await PasswordReset.findByIdAndRemove(passwordId);
+
+    return true;
+  }
 
   async changePassword() {}
 }

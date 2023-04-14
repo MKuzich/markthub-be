@@ -52,10 +52,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var crypto_1 = __importDefault(require("crypto"));
 var User_1 = __importDefault(require("../models/User"));
+var PasswordReset_1 = __importDefault(require("../models/PasswordReset"));
 var errors_1 = require("../helpers/errors");
 var uuid_1 = require("uuid");
-var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION_TIME = _a.ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRATION_TIME = _a.REFRESH_TOKEN_EXPIRATION_TIME;
+var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION_TIME = _a.ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRATION_TIME = _a.REFRESH_TOKEN_EXPIRATION_TIME, ENCRYPTION_KEY = _a.ENCRYPTION_KEY;
 var AuthService = /** @class */ (function () {
     function AuthService() {
     }
@@ -67,29 +69,30 @@ var AuthService = /** @class */ (function () {
                     case 0:
                         id = jsonwebtoken_1.default.verify(token, ACCESS_TOKEN_SECRET).id;
                         if (!id) {
-                            throw (0, errors_1.createError)(401, "Not authorized");
+                            throw (0, errors_1.createError)(401, "Not authorized.");
                         }
                         return [4 /*yield*/, User_1.default.findById(id)];
                     case 1:
                         user = _a.sent();
                         if (!user || !user.accessToken) {
-                            throw (0, errors_1.createError)(401, "Invalid token");
+                            throw (0, errors_1.createError)(401, "Invalid token.");
                         }
                         if (user.accessToken !== token) {
-                            throw (0, errors_1.createError)(401, "Bad credential");
+                            throw (0, errors_1.createError)(401, "Bad credential.");
                         }
                         return [2 /*return*/, user];
                 }
             });
         });
     };
-    AuthService.refresh = function (refreshToken, accessToken) {
+    AuthService.refresh = function (cookies, accessToken) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, payload, newAccessToken, newRefreshToken;
+            var token, id, payload, newAccessToken, newRefreshToken;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!!refreshToken) return [3 /*break*/, 2];
+                        token = cookies === null || cookies === void 0 ? void 0 : cookies.refreshToken;
+                        if (!(!cookies || !token)) return [3 /*break*/, 2];
                         id = jsonwebtoken_1.default.decode(accessToken).id;
                         return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, {
                                 accessToken: null,
@@ -97,9 +100,9 @@ var AuthService = /** @class */ (function () {
                             })];
                     case 1:
                         _a.sent();
-                        throw (0, errors_1.createError)(401, "Refresh token is missing");
+                        throw (0, errors_1.createError)(401, "Refresh token is missing.");
                     case 2:
-                        payload = jsonwebtoken_1.default.verify(refreshToken, REFRESH_TOKEN_SECRET);
+                        payload = jsonwebtoken_1.default.verify(token, REFRESH_TOKEN_SECRET);
                         newAccessToken = jsonwebtoken_1.default.sign(payload, ACCESS_TOKEN_SECRET, {
                             expiresIn: ACCESS_TOKEN_EXPIRATION_TIME,
                         });
@@ -236,10 +239,114 @@ var AuthService = /** @class */ (function () {
             });
         });
     };
-    AuthService.prototype.logOut = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
+    AuthService.prototype.getCurrent = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, phone, email, firstName, secondName, image, rate, date, reviews, _id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(409, "Undefined user.");
+                        }
+                        phone = user.phone, email = user.email, firstName = user.firstName, secondName = user.secondName, image = user.image, rate = user.rate, date = user.date, reviews = user.reviews, _id = user._id;
+                        return [2 /*return*/, {
+                                phone: phone,
+                                email: email,
+                                firstName: firstName,
+                                secondName: secondName,
+                                image: image,
+                                rate: rate,
+                                date: date,
+                                reviews: reviews,
+                                _id: _id,
+                            }];
+                }
+            });
+        });
+    };
+    AuthService.prototype.logOut = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, {
+                            accessToken: null,
+                            refreshToken: null,
+                        })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    AuthService.prototype.createPasswordReset = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var token, iv, cipher, encryptedToken, createdPasswordReset;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        token = crypto_1.default.randomBytes(32).toString("hex");
+                        iv = crypto_1.default.randomBytes(16);
+                        cipher = crypto_1.default.createCipheriv("aes-256-cbc", ENCRYPTION_KEY, iv);
+                        encryptedToken = cipher.update(token, "utf8", "base64");
+                        encryptedToken += cipher.final("base64");
+                        return [4 /*yield*/, PasswordReset_1.default.findOne({ user: id })];
+                    case 1:
+                        createdPasswordReset = _a.sent();
+                        if (!createdPasswordReset) return [3 /*break*/, 3];
+                        return [4 /*yield*/, PasswordReset_1.default.findByIdAndUpdate(createdPasswordReset._id, {
+                                encryptedToken: encryptedToken,
+                                iv: iv,
+                            })];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 5];
+                    case 3: return [4 /*yield*/, PasswordReset_1.default.create({
+                            user: id,
+                            decryptedToken: token,
+                            iv: iv,
+                        })];
+                    case 4:
+                        _a.sent();
+                        _a.label = 5;
+                    case 5: return [2 /*return*/, token];
+                }
+            });
+        });
+    };
+    AuthService.prototype.resetPassword = function (encryptedToken, newPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var passwordReset, user, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, PasswordReset_1.default.findOne({
+                            encryptedToken: encryptedToken,
+                        }).populate("user")];
+                    case 1:
+                        passwordReset = _b.sent();
+                        if (!passwordReset) {
+                            return [2 /*return*/, res
+                                    .status(400)
+                                    .json({ message: "Invalid or expired password reset token" })];
+                        }
+                        user = passwordReset.user;
+                        _a = user;
+                        return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
+                    case 2:
+                        _a.password = _b.sent();
+                        return [4 /*yield*/, user.save()];
+                    case 3:
+                        _b.sent();
+                        return [4 /*yield*/, passwordReset.deleteOne()];
+                    case 4:
+                        _b.sent();
+                        res.status(200).json({ message: "Password reset successful" });
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     AuthService.prototype.changePassword = function () {
         return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {

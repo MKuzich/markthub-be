@@ -30,4 +30,22 @@ export default class EmailService {
     await this.transporter.sendMail(emailOptions);
     return true;
   }
+
+  async sendChangePassword(
+    email: string,
+    resetToken: string,
+    passwordId: string
+  ) {
+    const resetLink = `${BASE_URL}/api/auth/reset-password/${encodeURIComponent(
+      resetToken
+    )}/${passwordId}`;
+    const emailOptions = {
+      to: email,
+      from: MAIL,
+      subject: "Change your password for MarketHub account",
+      html: `<h4>Click on this link to change password on MarketHub shop ${resetLink}</h4><bold>If it you didn't click for password change just ignore this link!</bold>`,
+    };
+    await this.transporter.sendMail(emailOptions);
+    return true;
+  }
 }

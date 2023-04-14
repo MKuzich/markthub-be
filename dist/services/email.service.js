@@ -75,6 +75,27 @@ var EmailService = /** @class */ (function () {
             });
         });
     };
+    EmailService.prototype.sendChangePassword = function (email, resetToken) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resetLink, emailOptions;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        resetLink = "".concat(BASE_URL, "/api/auth/reset-password/").concat(encodeURIComponent(resetToken));
+                        emailOptions = {
+                            to: email,
+                            from: MAIL,
+                            subject: "Change your password for MarketHub account",
+                            html: "<h4>Click on this link to change password on MarketHub shop ".concat(resetLink, "</h4><bold>If it you didn't click for password change just ignore this link!</bold>"),
+                        };
+                        return [4 /*yield*/, this.transporter.sendMail(emailOptions)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
     return EmailService;
 }());
 exports.default = EmailService;

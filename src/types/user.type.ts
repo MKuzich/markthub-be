@@ -26,6 +26,10 @@ export interface IUserCreate {
   image?: string;
 }
 
+export interface IUserChangePassword {
+  email: string;
+}
+
 export interface IUserLogIn {
   phone?: string;
   email?: string;
@@ -46,4 +50,12 @@ export interface IRefreshTokenData {
 
 export interface IUserTokenPayload {
   id: string;
+}
+
+export interface User {
+  id: string;
+}
+
+export interface IUserCookies {
+  refreshToken: string;
 }

@@ -43,7 +43,7 @@ var auth_service_1 = __importDefault(require("../services/auth.service"));
 var errors_1 = require("../helpers/errors");
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var auth = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, authorization, _b, tokenType, token, user, err_1, refreshToken, _c, payload, newAccessToken, newRefreshToken, err_2;
+    var _a, authorization, _b, tokenType, token, user, err_1, _c, payload, newAccessToken, newRefreshToken, err_2;
     return __generator(this, function (_d) {
         switch (_d.label) {
             case 0:
@@ -61,7 +61,7 @@ var auth = function (req, res, next) { return __awaiter(void 0, void 0, void 0, 
                 if (!user) {
                     next((0, errors_1.createError)(401, "Not authorized"));
                 }
-                req.user = user;
+                req.user = { id: user._id };
                 next();
                 return [3 /*break*/, 10];
             case 3:
@@ -70,8 +70,7 @@ var auth = function (req, res, next) { return __awaiter(void 0, void 0, void 0, 
                 _d.label = 4;
             case 4:
                 _d.trys.push([4, 6, , 7]);
-                refreshToken = req.cookies.refreshToken;
-                return [4 /*yield*/, auth_service_1.default.refresh(refreshToken, token)];
+                return [4 /*yield*/, auth_service_1.default.refresh(req.cookies, token)];
             case 5:
                 _c = _d.sent(), payload = _c.payload, newAccessToken = _c.newAccessToken, newRefreshToken = _c.newRefreshToken;
                 req.user = payload;

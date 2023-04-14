@@ -14,14 +14,13 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       next(createError(401, "Not authorized"));
     }
-    req.user = user!;
+    req.user = { id: user._id };
     next();
   } catch (err: any) {
     if (err instanceof jwt.TokenExpiredError) {
       try {
-        const { refreshToken } = req.cookies;
         const { payload, newAccessToken, newRefreshToken } =
-          await AuthService.refresh(refreshToken, token);
+          await AuthService.refresh(req.cookies, token);
         req.user = payload;
 
         res.cookie("refreshToken", newRefreshToken, { httpOnly: true });
