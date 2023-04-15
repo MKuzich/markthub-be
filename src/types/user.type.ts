@@ -11,6 +11,8 @@ export interface IUser extends Document {
   date: Date;
   reviews: string[];
   products: string[];
+  cart: string[];
+  orders: string[];
   accessToken: string | null;
   _id: string;
   refreshToken: string | null;

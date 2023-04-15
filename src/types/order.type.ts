@@ -1,4 +1,7 @@
-import { IProductOrdered } from "./product.type";
+export interface IOrderedProducts {
+  product: string;
+  quantity: number;
+}
 
 export interface IOrder {
   _id: string;
@@ -12,7 +15,7 @@ export interface IOrder {
     city: string;
     address: string;
   };
-  products: IProductOrdered[];
+  products: IOrderedProducts[];
   totalPrice: number;
   priceWithoutPromo: number;
 }

@@ -72,6 +72,8 @@ export default class UserService {
       date,
       reviews,
       products,
+      cart,
+      orders,
       _id,
     } = user;
     return {
@@ -84,6 +86,8 @@ export default class UserService {
       date,
       reviews,
       products,
+      cart,
+      orders,
       _id,
     };
   }

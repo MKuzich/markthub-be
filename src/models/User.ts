@@ -69,6 +69,24 @@ const userSchema = new Schema<IUser>({
     ],
     default: [],
   },
+  cart: {
+    type: [
+      {
+        type: String,
+        ref: "Product",
+      },
+    ],
+    default: [],
+  },
+  orders: {
+    type: [
+      {
+        type: String,
+        ref: "Order",
+      },
+    ],
+    default: [],
+  },
   accessToken: {
     type: String,
     default: null,

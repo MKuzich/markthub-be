@@ -1,5 +1,10 @@
 import { ParamsDictionary } from "express-serve-static-core";
 
+export interface IProductsInOrder {
+  order: string;
+  quantity: number;
+}
+
 export interface IProduct {
   _id: string;
   name: string;
@@ -15,6 +20,7 @@ export interface IProduct {
   totalOrders: number;
   date: Date;
   reviews: string[];
+  orders: IProductsInOrder[];
   quantity: number;
 }
 

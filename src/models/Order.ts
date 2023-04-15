@@ -37,40 +37,23 @@ const orderSchema = new Schema<IOrder>({
       required: true,
     },
   },
-  products: [
-    {
-      _id: { type: String, required: true },
-      name: { type: String, required: true },
-      category: { type: String, ref: "Category" },
-      image: {
-        type: String,
+  products: {
+    type: [
+      {
+        product: {
+          type: {
+            type: String,
+            ref: "Product",
+          },
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
       },
-      price: {
-        type: Number,
-        required: true,
-      },
-      promoPrice: {
-        type: Number,
-        default: 0,
-      },
-      owner: {
-        type: String,
-        ref: "User",
-      },
-      rate: {
-        type: Number,
-        default: 0,
-      },
-      date: {
-        type: Date,
-        default: new Date(),
-      },
-      quantity: {
-        type: Number,
-        required: true,
-      },
-    },
-  ],
+    ],
+    required: true,
+  },
   totalPrice: {
     type: Number,
     required: true,

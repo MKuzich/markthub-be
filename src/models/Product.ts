@@ -60,6 +60,23 @@ const productSchema = new Schema<IProduct>({
       ref: "Review",
     },
   ],
+  orders: {
+    type: [
+      {
+        product: {
+          type: {
+            type: String,
+            ref: "Order",
+          },
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    default: [],
+  },
   quantity: {
     type: Number,
     required: true,
