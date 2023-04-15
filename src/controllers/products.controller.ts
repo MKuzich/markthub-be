@@ -1,5 +1,7 @@
 import { Request } from "express";
 import ProductService from "../services/product.service";
+import CategoryService from "../services/category.service";
+import UserService from "../services/user.service";
 import {
   IProduct,
   IProductsQueryParams,
@@ -11,7 +13,11 @@ import { IFile } from "../types/file.type";
 import { IUserTokenPayload } from "../types/user.type";
 
 class ProductController {
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private categoryService: CategoryService,
+    private userService: UserService
+  ) {}
 
   async getProducts(
     req: IRequest<any, IProductsQueryParams, any, any>
@@ -40,6 +46,8 @@ class ProductController {
       fileArray = Object.values(images).flat();
     }
     const product = await this.productService.add(id, data, fileArray);
+    await this.userService.addProduct(id, product._id);
+    await this.categoryService.addProduct(product.category, product._id);
     return product;
   }
 
@@ -56,10 +64,16 @@ class ProductController {
   async deleteProduct(req: Request<{ productId: string }>) {
     const { productId } = req.params;
     const { id } = req.user as IUserTokenPayload;
-    const isDeleted = await this.productService.delete(id, productId);
-    return isDeleted;
+    const product = await this.productService.delete(id, productId);
+    await this.userService.deleteProduct(id, product._id);
+    await this.categoryService.deleteProduct(product.category, product._id);
+    return product;
   }
 }
 
-const productController = new ProductController(new ProductService());
+const productController = new ProductController(
+  new ProductService(),
+  new CategoryService(),
+  new UserService()
+);
 export default productController;

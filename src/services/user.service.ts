@@ -115,4 +115,32 @@ export default class UserService {
     }
     return true;
   }
+
+  async addProduct(userId: string, productId: string) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { products: { $each: [productId], $position: 0 } },
+      },
+      { new: true }
+    );
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+    return true;
+  }
+
+  async deleteProduct(userId: string, productId: string) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { products: productId },
+      },
+      { new: true }
+    );
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+    return true;
+  }
 }

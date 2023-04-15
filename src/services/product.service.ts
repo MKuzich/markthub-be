@@ -129,7 +129,10 @@ export default class ProductService {
 
     checkOwner(product, userId, "product");
 
-    await Product.findByIdAndRemove(productId);
-    return true;
+    const deletedProduct = await Product.findByIdAndRemove(productId);
+    if (!deletedProduct) {
+      throw createError(404, "Product not found.");
+    }
+    return deletedProduct;
   }
 }
