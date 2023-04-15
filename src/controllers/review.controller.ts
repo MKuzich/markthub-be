@@ -4,11 +4,13 @@ import { IRequest } from "../types/request.type";
 import { IReviewQueryParams } from "../types/review.type";
 import { IUserTokenPayload } from "../types/user.type";
 import ProductService from "../services/product.service";
+import UserService from "../services/user.service";
 
 class ReviewController {
   constructor(
     private reviewService: ReviewService,
-    private productService: ProductService
+    private productService: ProductService,
+    private userService: UserService
   ) {}
 
   async getReviews(req: IRequest<any, IReviewQueryParams, any, any>) {
@@ -30,6 +32,7 @@ class ReviewController {
     const review = await this.reviewService.add(id, data);
     const { _id, product } = review;
     await this.productService.addReview(product, _id.toString());
+    await this.userService.addReview(id, _id.toString());
     return review;
   }
 
@@ -48,12 +51,14 @@ class ReviewController {
     const isDeleted = await this.reviewService.delete(id, reviewId);
     const { _id, product } = review;
     await this.productService.deleteReview(product, _id.toString());
+    await this.userService.deleteReview(id, _id.toString());
     return isDeleted;
   }
 }
 
 const reviewController = new ReviewController(
   new ReviewService(),
-  new ProductService()
+  new ProductService(),
+  new UserService()
 );
 export default reviewController;

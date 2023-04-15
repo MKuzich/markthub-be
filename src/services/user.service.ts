@@ -87,4 +87,32 @@ export default class UserService {
       _id,
     };
   }
+
+  async addReview(userId: string, reviewId: string) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { reviews: { $each: [reviewId], $position: 0 } },
+      },
+      { new: true }
+    );
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+    return true;
+  }
+
+  async deleteReview(userId: string, reviewId: string) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { reviews: reviewId },
+      },
+      { new: true }
+    );
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+    return true;
+  }
 }

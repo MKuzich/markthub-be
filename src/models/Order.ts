@@ -1,6 +1,6 @@
 import { Model, model, Schema } from "mongoose";
 
-import { IOrder } from "src/types/order.type";
+import { IOrder } from "../types/order.type";
 
 const orderSchema = new Schema<IOrder>({
   date: {

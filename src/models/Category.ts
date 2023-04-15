@@ -19,6 +19,15 @@ const categorySchema = new Schema<ICategory>({
     type: String,
     required: true,
   },
+  products: {
+    type: [
+      {
+        type: String,
+        ref: "Product",
+      },
+    ],
+    default: [],
+  },
 });
 
 const Category: Model<ICategory> = model("Category", categorySchema);

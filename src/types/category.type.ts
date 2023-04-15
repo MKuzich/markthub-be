@@ -4,6 +4,7 @@ export interface ICategory {
   tag: string;
   desription: string;
   image: string;
+  products: string[];
 }
 
 export interface ICategoryCreate {

@@ -1,6 +1,6 @@
 import { Model, model, Schema } from "mongoose";
 
-import { ITransaction } from "src/types/transaction.type";
+import { ITransaction } from "../types/transaction.type";
 
 const transactionSchema = new Schema<ITransaction>({
   owner: {
