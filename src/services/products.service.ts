@@ -91,8 +91,8 @@ export default class ProductsService {
     return product;
   }
 
-  async delete(_id: string) {
-    const product = await Product.findByIdAndRemove({ _id });
+  async delete(id: string) {
+    const product = await Product.findByIdAndRemove(id);
     return product;
   }
 }

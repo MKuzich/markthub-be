@@ -34,4 +34,21 @@ export default class ReviewService {
     await Review.findByIdAndUpdate(reviewId, data);
     return true;
   }
+
+  async delete(userId: string, reviewId: string) {
+    const review = await Review.findById(reviewId);
+
+    if (!review) {
+      return createError(404, `Review not found.`);
+    }
+    if (review.owner !== userId) {
+      throw createError(
+        403,
+        "Forbidden. You cann't delete this review, because it's not your."
+      );
+    }
+
+    await Review.findByIdAndRemove(reviewId);
+    return true;
+  }
 }
