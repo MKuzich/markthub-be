@@ -9,7 +9,6 @@ import {
   IUserLogIn,
   IUserTokenPayload,
   IUserCookies,
-  IUserChangeData,
   IUserChangePassword,
 } from "../types/user.type";
 import { createError } from "../helpers/errors";
@@ -67,14 +66,6 @@ export default class AuthService {
     return { payload, newAccessToken, newRefreshToken };
   }
 
-  async getUserByEmail(email: string) {
-    const user = await User.findOne({ email });
-    if (!user) {
-      throw createError(409, "Wrong email.");
-    }
-    return user;
-  }
-
   async verifyEmail(email: string, id: string) {
     const user = await User.findOne({ email });
     if (user) {
@@ -83,47 +74,6 @@ export default class AuthService {
     const emailChangeToken = uuidv4();
     await User.findByIdAndUpdate(id, { emailChangeToken, newEmail: email });
     return emailChangeToken;
-  }
-
-  async changeData(
-    id: string,
-    data: IUserChangeData,
-    file: IFile | null = null
-  ) {
-    const newUsersData = { ...data };
-
-    if (file) {
-      const containerName = "users";
-      const blobServiceClient = BlobServiceClient.fromConnectionString(
-        AZURE_STORAGE_CONNECTION_STRING!
-      );
-      const containerClient =
-        blobServiceClient.getContainerClient(containerName);
-      const upload = file;
-      if (upload) {
-        const filename = uuidv4() + "-" + upload.originalname;
-        const blobClient = containerClient.getBlockBlobClient(filename);
-        await blobClient.uploadData(upload.buffer, {
-          blobHTTPHeaders: { blobContentType: upload.mimetype },
-        });
-        newUsersData.image = blobClient.url;
-
-        const user = await User.findById(id);
-        if (!user) {
-          throw createError(404, "User not found.");
-        }
-        if (user.image) {
-          const oldImageParts = user.image.split("/");
-          const oldImage = oldImageParts[oldImageParts.length - 1];
-
-          const oldBlobClient = containerClient.getBlockBlobClient(oldImage);
-          await oldBlobClient.delete();
-        }
-      }
-
-      await User.findByIdAndUpdate(id, newUsersData);
-      return true;
-    }
   }
 
   async signUp(userData: IUserCreate, file: IFile | null) {
@@ -222,35 +172,6 @@ export default class AuthService {
       throw createError(500, "Tokens didnot create.");
     }
     return updatedUser;
-  }
-
-  async getCurrent(id: string) {
-    const user = await User.findById(id);
-    if (!user) {
-      throw createError(409, "Undefined user.");
-    }
-    const {
-      phone,
-      email,
-      firstName,
-      secondName,
-      image,
-      rate,
-      date,
-      reviews,
-      _id,
-    } = user;
-    return {
-      phone,
-      email,
-      firstName,
-      secondName,
-      image,
-      rate,
-      date,
-      reviews,
-      _id,
-    };
   }
 
   async logOut(id: string) {

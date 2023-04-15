@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
 import AuthService from "../services/auth.service";
 import EmailService from "../services/email.service";
+import UserService from "../services/user.service";
 import { createError } from "../helpers/errors";
 import { IUserTokenPayload } from "../types/user.type";
 
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private emailService: EmailService
+    private emailService: EmailService,
+    private userService: UserService
   ) {}
 
   async signUpUser(req: Request) {
@@ -38,7 +40,7 @@ export class AuthController {
     if (!email) {
       throw createError(400, "Missing required field email");
     }
-    const user = await this.authService.getUserByEmail(email);
+    const user = await this.userService.getUserByEmail(email);
     if (!user.verificationToken) {
       throw createError(409, "No verification token in user data.");
     }
@@ -66,7 +68,7 @@ export class AuthController {
       throw createError(401, "Not authorized.");
     }
     const { id } = req.user as IUserTokenPayload;
-    const user = await this.authService.getCurrent(id);
+    const user = await this.userService.getCurrent(id);
 
     return user;
   }
@@ -82,7 +84,7 @@ export class AuthController {
 
   async changeForgottenUserPassword(req: Request) {
     const { email } = req.body;
-    const user = await this.authService.getUserByEmail(email);
+    const user = await this.userService.getUserByEmail(email);
     const { encryptedToken, id } = await this.authService.createPasswordReset(
       user._id
     );
@@ -123,15 +125,6 @@ export class AuthController {
     return updatedUser;
   }
 
-  async changeUserData(req: Request) {
-    const data = req.body;
-    const image = req.file ?? null;
-    const { id } = req.user as IUserTokenPayload;
-
-    const isChanged = await this.authService.changeData(id, data, image);
-    return isChanged;
-  }
-
   async changeUserPassword(req: Request) {
     const data = req.body;
     const { id } = req.user as IUserTokenPayload;
@@ -142,6 +135,7 @@ export class AuthController {
 
 const authController = new AuthController(
   new AuthService(),
-  new EmailService()
+  new EmailService(),
+  new UserService()
 );
 export default authController;

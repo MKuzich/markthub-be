@@ -10,6 +10,7 @@ export interface IUser extends Document {
   rate: number;
   date: Date;
   reviews: string[];
+  products: string[];
   accessToken: string | null;
   _id: string;
   refreshToken: string | null;

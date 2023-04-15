@@ -1,5 +1,5 @@
 import { Request } from "express";
-import ProductsService from "../services/products.service";
+import ProductService from "../services/product.service";
 import {
   IProduct,
   IProductsQueryParams,
@@ -10,8 +10,8 @@ import { IRequest } from "../types/request.type";
 import { IFile } from "../types/file.type";
 import { IUserTokenPayload } from "../types/user.type";
 
-class ProductsController {
-  constructor(private productsService: ProductsService) {}
+class ProductController {
+  constructor(private productService: ProductService) {}
 
   async getProducts(
     req: IRequest<any, IProductsQueryParams, any, any>
@@ -19,18 +19,13 @@ class ProductsController {
     const { search = "", filter, page = 1, limit = 10 } = req.query;
 
     const skip = (page - 1) * limit;
-    const data = await this.productsService.findAll(
-      search,
-      filter,
-      skip,
-      limit
-    );
+    const data = await this.productService.findAll(search, filter, skip, limit);
     return data;
   }
 
   async getProductById(req: Request<{ productId: string }>) {
     const { productId } = req.params;
-    const product = await this.productsService.findById(productId);
+    const product = await this.productService.findById(productId);
     return product;
   }
 
@@ -44,7 +39,7 @@ class ProductsController {
     } else if (typeof images === "object" && images !== null) {
       fileArray = Object.values(images).flat();
     }
-    const product = await this.productsService.add(id, data, fileArray);
+    const product = await this.productService.add(id, data, fileArray);
     return product;
   }
 
@@ -54,17 +49,17 @@ class ProductsController {
     const { productId } = req.params;
     const { id } = req.user as IUserTokenPayload;
     const data = req.body;
-    const isUpdated = await this.productsService.change(id, productId, data);
+    const isUpdated = await this.productService.change(id, productId, data);
     return isUpdated;
   }
 
   async deleteProduct(req: Request<{ productId: string }>) {
     const { productId } = req.params;
     const { id } = req.user as IUserTokenPayload;
-    const isDeleted = await this.productsService.delete(id, productId);
+    const isDeleted = await this.productService.delete(id, productId);
     return isDeleted;
   }
 }
 
-const productsController = new ProductsController(new ProductsService());
-export default productsController;
+const productController = new ProductController(new ProductService());
+export default productController;

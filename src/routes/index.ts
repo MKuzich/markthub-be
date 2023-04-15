@@ -6,6 +6,7 @@ import ordersRouter from "./api/orders.route";
 import reviewsRouter from "./api/reviews.route";
 import transactionsRouter from "./api/transactions.route";
 import authRouter from "./api/auth.route";
+import userRouter from "./api/user.route";
 
 class AppRouter {
   constructor(private app: Application) {}
@@ -20,6 +21,7 @@ class AppRouter {
     this.app.use("/api/reviews", reviewsRouter);
     this.app.use("/api/transactions", transactionsRouter);
     this.app.use("/api/auth", authRouter);
+    this.app.use("/api/user", userRouter);
   }
 }
 

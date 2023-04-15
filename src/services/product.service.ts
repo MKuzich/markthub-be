@@ -12,7 +12,7 @@ import { checkOwner } from "../helpers/checkOwner";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
-export default class ProductsService {
+export default class ProductService {
   async findAll(search: string, filter: string, skip: number, limit: number) {
     const products = await Product.find().skip(skip).limit(limit);
     const total = await Product.find().countDocuments();
@@ -85,6 +85,34 @@ export default class ProductsService {
 
     const orderedProducts = await Promise.all(changeProductsPromises);
     return orderedProducts;
+  }
+
+  async addReview(productId: string, reviewId: string) {
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      {
+        $push: { reviews: { $each: [reviewId], $position: 0 } },
+      },
+      { new: true }
+    );
+    if (!product) {
+      throw createError(404, "Product not found.");
+    }
+    return true;
+  }
+
+  async deleteReview(productId: string, reviewId: string) {
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      {
+        $pull: { reviews: reviewId },
+      },
+      { new: true }
+    );
+    if (!product) {
+      throw createError(404, "Product not found.");
+    }
+    return true;
   }
 
   async change(userId: string, productId: string, data: IProductChangeData) {

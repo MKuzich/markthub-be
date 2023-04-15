@@ -60,6 +60,15 @@ const userSchema = new Schema<IUser>({
     ],
     default: [],
   },
+  products: {
+    type: [
+      {
+        type: String,
+        ref: "Product",
+      },
+    ],
+    default: [],
+  },
   accessToken: {
     type: String,
     default: null,

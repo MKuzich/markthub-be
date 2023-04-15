@@ -50,13 +50,6 @@ authRouter.post(
 );
 
 authRouter.patch(
-  "/:id",
-  auth,
-  parseAvatar(),
-  tryCatch(authController.changeUserData.bind(authController))
-);
-
-authRouter.patch(
   "/change-password",
   auth,
   tryCatch(authController.changeUserPassword.bind(authController))

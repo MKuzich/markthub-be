@@ -12,6 +12,9 @@ export default class ReviewService {
 
   async findById(id: string) {
     const review = await Review.findById(id);
+    if (!review) {
+      throw createError(404, "Review not found.");
+    }
     return review;
   }
 
