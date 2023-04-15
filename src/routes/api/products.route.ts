@@ -12,7 +12,7 @@ productsRouter.get(
 );
 
 productsRouter.get(
-  "/:id",
+  "/:productId",
   tryCatch(productsController.getProductById.bind(productsController))
 );
 
@@ -24,13 +24,13 @@ productsRouter.post(
 );
 
 productsRouter.patch(
-  "/:id",
+  "/:productId",
   auth,
   tryCatch(productsController.changeProduct.bind(productsController))
 );
 
 productsRouter.delete(
-  "/:id",
+  "/:productId",
   auth,
   tryCatch(productsController.deleteProduct.bind(productsController))
 );

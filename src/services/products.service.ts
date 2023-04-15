@@ -8,6 +8,7 @@ import {
 } from "../types/product.type";
 import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
+import { checkOwner } from "../helpers/checkOwner";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
@@ -23,8 +24,8 @@ export default class ProductsService {
     return product;
   }
 
-  async add(product: IProductCreate, files: IFile[]) {
-    const newProduct = product;
+  async add(owner: string, product: IProductCreate, files: IFile[]) {
+    const newProduct = { ...product, owner };
     const images: string[] = [];
     const containerName = "product-photos";
     const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -86,13 +87,21 @@ export default class ProductsService {
     return orderedProducts;
   }
 
-  async change(id: string, data: IProductChangeData) {
-    const product = await Product.findByIdAndUpdate(id, data, { new: true });
-    return product;
+  async change(userId: string, productId: string, data: IProductChangeData) {
+    const product = await Product.findById(productId);
+
+    checkOwner(product, userId, "product");
+
+    await Product.findByIdAndUpdate(productId, data, { new: true });
+    return true;
   }
 
-  async delete(id: string) {
-    const product = await Product.findByIdAndRemove(id);
-    return product;
+  async delete(userId: string, productId: string) {
+    const product = await Product.findById(productId);
+
+    checkOwner(product, userId, "product");
+
+    await Product.findByIdAndRemove(productId);
+    return true;
   }
 }
