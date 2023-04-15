@@ -4,35 +4,35 @@ import { tryCatch } from "../../middlewares/tryCatch.middleware";
 import { parseFormData } from "../../middlewares/parseFormData";
 import auth from "../../middlewares/authValidate.middleware";
 
-const productsRouter: Router = Router();
+const productRouter: Router = Router();
 
-productsRouter.get(
+productRouter.get(
   "/",
   tryCatch(productsController.getProducts.bind(productsController))
 );
 
-productsRouter.get(
+productRouter.get(
   "/:productId",
   tryCatch(productsController.getProductById.bind(productsController))
 );
 
-productsRouter.post(
+productRouter.post(
   "/",
   auth,
   parseFormData(),
   tryCatch(productsController.addProduct.bind(productsController))
 );
 
-productsRouter.patch(
+productRouter.patch(
   "/:productId",
   auth,
   tryCatch(productsController.changeProduct.bind(productsController))
 );
 
-productsRouter.delete(
+productRouter.delete(
   "/:productId",
   auth,
   tryCatch(productsController.deleteProduct.bind(productsController))
 );
 
-export default productsRouter;
+export default productRouter;

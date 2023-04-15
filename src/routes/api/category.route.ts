@@ -2,21 +2,21 @@ import { Router } from "express";
 import categoryController from "../../controllers/category.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
 
-const categoriesRouter: Router = Router();
+const categoryRouter: Router = Router();
 
-categoriesRouter.get(
+categoryRouter.get(
   "/",
   tryCatch(categoryController.getCategories.bind(categoryController))
 );
 
-categoriesRouter.get(
+categoryRouter.get(
   "/:categoryId",
   tryCatch(categoryController.getCategories.bind(categoryController))
 );
 
-categoriesRouter.post(
+categoryRouter.post(
   "/",
   tryCatch(categoryController.addCategory.bind(categoryController))
 );
 
-export default categoriesRouter;
+export default categoryRouter;

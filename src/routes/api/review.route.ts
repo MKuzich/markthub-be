@@ -3,34 +3,34 @@ import reviewController from "../../controllers/review.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
 import auth from "../../middlewares/authValidate.middleware";
 
-const reviewsRouter: Router = Router();
+const reviewRouter: Router = Router();
 
-reviewsRouter.get(
+reviewRouter.get(
   "/",
   tryCatch(reviewController.getReviews.bind(reviewController))
 );
 
-reviewsRouter.get(
+reviewRouter.get(
   "/:reviewId",
   tryCatch(reviewController.getReviewById.bind(reviewController))
 );
 
-reviewsRouter.post(
+reviewRouter.post(
   "/",
   auth,
   tryCatch(reviewController.addReview.bind(reviewController))
 );
 
-reviewsRouter.patch(
+reviewRouter.patch(
   "/:reviewId",
   auth,
   tryCatch(reviewController.changeReview.bind(reviewController))
 );
 
-reviewsRouter.delete(
+reviewRouter.delete(
   "/:reviewId",
   auth,
   tryCatch(reviewController.deleteReview.bind(reviewController))
 );
 
-export default reviewsRouter;
+export default reviewRouter;
