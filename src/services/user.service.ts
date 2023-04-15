@@ -147,4 +147,18 @@ export default class UserService {
     }
     return true;
   }
+
+  async addOrder(userId: string, orderId: string) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { orders: { $each: [orderId], $position: 0 } },
+      },
+      { new: true }
+    );
+    if (!user) {
+      throw createError(404, "User not found.");
+    }
+    return true;
+  }
 }

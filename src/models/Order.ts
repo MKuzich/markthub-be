@@ -3,10 +3,6 @@ import { Model, model, Schema } from "mongoose";
 import { IOrder } from "../types/order.type";
 
 const orderSchema = new Schema<IOrder>({
-  date: {
-    type: Date,
-    default: new Date(),
-  },
   owner: {
     type: String,
     ref: "User",
@@ -37,6 +33,10 @@ const orderSchema = new Schema<IOrder>({
       required: true,
     },
   },
+  info: {
+    type: String,
+    default: null,
+  },
   products: {
     type: [
       {
@@ -46,7 +46,7 @@ const orderSchema = new Schema<IOrder>({
             ref: "Product",
           },
         },
-        quantity: {
+        amount: {
           type: Number,
           required: true,
         },
@@ -61,6 +61,19 @@ const orderSchema = new Schema<IOrder>({
   priceWithoutPromo: {
     type: Number,
     required: true,
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Paid", "Shipped", "Delivered", "Canceled"],
+    default: "Pending",
+  },
+  createdAt: {
+    type: Date,
+    default: new Date(),
+  },
+  updatedAt: {
+    type: Date,
+    default: new Date(),
   },
 });
 

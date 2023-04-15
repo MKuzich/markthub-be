@@ -9,6 +9,7 @@ import {
 import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
 import { checkOwner } from "../helpers/checkOwner";
+import { IOrderedProducts } from "../types/order.type";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
@@ -48,10 +49,10 @@ export default class ProductService {
     return data;
   }
 
-  async changeQuantityAndOrders(products: IProductsQuantity[]) {
+  async addOrder(products: IProductsQuantity[], orderId: string) {
     const selectedProducts = await Product.find({
-      $or: products.map(({ _id }) => {
-        return { _id };
+      $or: products.map(({ product }) => {
+        return { product };
       }),
     });
 
@@ -61,20 +62,21 @@ export default class ProductService {
 
     const isNotEnoughQuantity = selectedProducts.some(
       ({ _id, quantity }) =>
-        products.find((product) => product._id === _id.toString())!.amount >
+        products.find(({ product }) => product === _id.toString())!.amount >
         quantity
     );
     if (isNotEnoughQuantity) {
       return createError(400, `An insufficient amount of products at stock!`);
     }
 
-    const changeProductsPromises = products.map(({ _id, amount }) => {
+    const changeProductsPromises = products.map(({ product, amount }) => {
       const selectedProduct = selectedProducts.find(
-        (product) => product._id.toString() === _id
+        (selectedProduct) => selectedProduct._id.toString() === product
       )!;
       return Product.findByIdAndUpdate(
-        _id,
+        product,
         {
+          $push: { orders: { $each: [{ orderId, amount }], $position: 0 } },
           quantity: selectedProduct.quantity - amount,
           ordersPerDay: selectedProduct.ordersPerDay + amount,
           totalOrders: selectedProduct.totalOrders + amount,

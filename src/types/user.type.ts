@@ -1,4 +1,11 @@
 import { Document } from "mongoose";
+import { IOrderedProducts } from "./order.type";
+
+export interface IUserCart {
+  products: IOrderedProducts[];
+  totalPrice: number;
+  priceWithoutPromo: number;
+}
 
 export interface IUser extends Document {
   phone: string;

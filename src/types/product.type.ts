@@ -38,7 +38,7 @@ export interface IProductCreate {
 }
 
 export interface IProductsQuantity {
-  _id: string;
+  product: string;
   amount: number;
 }
 
@@ -69,16 +69,15 @@ export interface IProductOrdered {
   images?: string[];
   price: number;
   promoPrice: number;
+  description: string;
+  active: boolean;
   owner: string;
+  ordersPerDay: number;
+  totalOrders: number;
   rate: number;
   date: Date;
   quantity: number;
-}
-
-export interface IProductSent {
-  product: string;
-  quantity: number;
-  price: number;
+  reviews: string[];
 }
 
 export interface IProductsQueryParams extends ParamsDictionary {

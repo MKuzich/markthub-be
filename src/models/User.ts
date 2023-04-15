@@ -70,13 +70,31 @@ const userSchema = new Schema<IUser>({
     default: [],
   },
   cart: {
-    type: [
-      {
-        type: String,
-        ref: "Product",
-      },
-    ],
-    default: [],
+    products: {
+      type: [
+        {
+          product: {
+            type: {
+              type: String,
+              ref: "Product",
+            },
+          },
+          quantity: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+      required: true,
+    },
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    priceWithoutPromo: {
+      type: Number,
+      required: true,
+    },
   },
   orders: {
     type: [
