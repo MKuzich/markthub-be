@@ -4,7 +4,8 @@ import UserService from "../services/user.service";
 import ProductService from "../services/product.service";
 import { IUserTokenPayload } from "../types/user.type";
 import { IRequest } from "../types/request.type";
-import { IOrderQueryParams } from "../types/order.type";
+import { IOrdersQuery } from "../types/order.type";
+import { buildOrderQuery } from "../helpers/buildOrderQuery";
 
 class OrderController {
   constructor(
@@ -13,17 +14,13 @@ class OrderController {
     private productService: ProductService
   ) {}
 
-  async getOrders(req: IRequest<any, IOrderQueryParams, any, any>) {
-    const { search = "", filter, page = 1, limit = 3 } = req.query;
+  async getOrders(req: IRequest<any, IOrdersQuery, any, any>) {
+    const { page = 1, limit = 3 } = req.query;
     const { id } = req.user as IUserTokenPayload;
     const skip = (page - 1) * limit;
-    const orders = await this.orderService.findAll(
-      search,
-      filter,
-      id,
-      skip,
-      limit
-    );
+    const filter = req.query;
+    const query = buildOrderQuery(filter, id);
+    const orders = await this.orderService.findAll(query, skip, limit);
     return orders;
   }
 

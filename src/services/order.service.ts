@@ -1,18 +1,12 @@
 import { createError } from "../helpers/errors";
 import Order from "../models/Order";
-import { IOrderChange, IOrderCreate } from "../types/order.type";
+import { IOrderChange, IOrderCreate, IOrderQuery } from "../types/order.type";
 import { checkOwner } from "../helpers/checkOwner";
 
 export default class OrderService {
-  async findAll(
-    search: string,
-    filter: string,
-    userId: string,
-    skip: number,
-    limit: number
-  ) {
-    const orders = Order.find().skip(skip).limit(limit);
-    const total = await Order.find({ owner: userId }).countDocuments();
+  async findAll(query: IOrderQuery, skip: number, limit: number) {
+    const orders = Order.find(query).skip(skip).limit(limit);
+    const total = await Order.find(query).countDocuments();
     return { orders, total };
   }
 

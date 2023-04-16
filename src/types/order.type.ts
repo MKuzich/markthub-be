@@ -57,9 +57,30 @@ export interface IOrderChange {
   updatedAt?: Date;
 }
 
-export interface IOrderQueryPagination extends ParamsDictionary {
+export interface IOrderPagination extends ParamsDictionary {
   page: string;
   limit: string;
 }
 
-export interface IOrderFilter {}
+export interface IOrderFilter {
+  status?: "Pending" | "Paid" | "Shipped" | "Delivered" | "Canceled";
+  totalPrice?: { min?: number; max?: number };
+  createdAt?: { from?: Date; to?: Date };
+  search?: string;
+}
+
+export type IOrdersQuery = IOrderPagination & IOrderFilter;
+
+export interface IOrderQuery {
+  owner?: string;
+  status?: "Pending" | "Paid" | "Shipped" | "Delivered" | "Canceled";
+  createdAt?: {
+    from?: Date;
+    to?: Date;
+  };
+  totalPrice?: {
+    min?: number;
+    max?: number;
+  };
+  $and?: any[];
+}
