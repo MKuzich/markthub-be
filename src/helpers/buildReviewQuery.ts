@@ -20,10 +20,7 @@ export const buildReviewQuery = ({
   if (search) {
     const searchTerms = search.split(" ");
     const searchQueries = searchTerms.map((term) => ({
-      $or: [
-        { header: new RegExp(term, "i") },
-        { description: new RegExp(term, "i") },
-      ],
+      $or: [{ title: new RegExp(term, "i") }, { text: new RegExp(term, "i") }],
     }));
     query.$and = [...(query.$and || []), ...searchQueries];
   }

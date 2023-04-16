@@ -33,8 +33,8 @@ export interface IReviewQuery {
   };
   $and?: Array<{
     $or: Array<{
-      header: RegExp;
-      description: RegExp;
+      title: RegExp;
+      text: RegExp;
     }>;
   }>;
 }
