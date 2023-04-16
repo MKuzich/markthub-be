@@ -5,17 +5,17 @@ import {
   IProductCreate,
   IProductChangeData,
   IProductsQuantity,
+  IProductQuery,
 } from "../types/product.type";
 import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
 import { checkOwner } from "../helpers/checkOwner";
-import { IOrderedProducts } from "../types/order.type";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
 export default class ProductService {
-  async findAll(search: string, filter: string, skip: number, limit: number) {
-    const products = await Product.find().skip(skip).limit(limit);
+  async findAll(query: IProductQuery, skip: number, limit: number) {
+    const products = await Product.find(query).skip(skip).limit(limit);
     const total = await Product.find().countDocuments();
     return { products, total };
   }

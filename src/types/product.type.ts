@@ -81,8 +81,63 @@ export interface IProductOrdered {
 }
 
 export interface IProductsQueryParams extends ParamsDictionary {
-  search: string;
-  filter: string;
   page: string;
   limit: string;
+}
+
+export interface IProductFilter {
+  category?: string;
+  price?: { min?: number; max?: number };
+  withImage?: boolean;
+  withPromoPrice?: boolean;
+  owner?: string;
+  active?: boolean;
+  rate?: { min?: number; max?: number };
+  totalOrders?: number;
+  withReviews?: boolean;
+  inStock?: number;
+  search?: string;
+}
+
+export type IProductsQuery = IProductsQueryParams & IProductFilter;
+
+export interface IProductQuery {
+  category?: string;
+  price?: {
+    $gte?: number;
+    $lte?: number;
+  };
+  images?: {
+    $exists: boolean;
+    $ne?: any[];
+  };
+  promoPrice?: {
+    $gt: number;
+  };
+  owner?: string;
+  active?: boolean;
+  rate?: {
+    $gte?: number;
+    $lte?: number;
+  };
+  totalOrders?: {
+    $gte: number;
+  };
+  reviews?: {
+    $exists: boolean;
+    $ne?: any[];
+  };
+  quantity?: {
+    $gte: number;
+  };
+  $and?: {
+    $or: {
+      header: {
+        $regex: RegExp;
+      };
+      description: {
+        $regex: RegExp;
+      };
+    }[];
+  }[];
 }

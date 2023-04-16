@@ -7,10 +7,12 @@ import {
   IProductsQueryParams,
   IProductCreate,
   IProductChangeData,
+  IProductsQuery,
 } from "../types/product.type";
 import { IRequest } from "../types/request.type";
 import { IFile } from "../types/file.type";
 import { IUserTokenPayload } from "../types/user.type";
+import { buildProductQuery } from "../helpers/buildProductQuery";
 
 class ProductController {
   constructor(
@@ -20,12 +22,13 @@ class ProductController {
   ) {}
 
   async getProducts(
-    req: IRequest<any, IProductsQueryParams, any, any>
+    req: IRequest<any, IProductsQuery, any, any>
   ): Promise<{ products: IProduct[]; total: number }> {
-    const { search = "", filter, page = 1, limit = 10 } = req.query;
-
+    const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
-    const data = await this.productService.findAll(search, filter, skip, limit);
+    const filter = req.query;
+    const query = buildProductQuery(filter);
+    const data = await this.productService.findAll(query, skip, limit);
     return data;
   }
 
