@@ -1,10 +1,11 @@
 import { Request } from "express";
 import ReviewService from "../services/review.service";
 import { IRequest } from "../types/request.type";
-import { IReviewQueryParams } from "../types/review.type";
+import { IReviewsQuery } from "../types/review.type";
 import { IUserTokenPayload } from "../types/user.type";
 import ProductService from "../services/product.service";
 import UserService from "../services/user.service";
+import { buildReviewQuery } from "../helpers/buildReviewQuery";
 
 class ReviewController {
   constructor(
@@ -13,10 +14,12 @@ class ReviewController {
     private userService: UserService
   ) {}
 
-  async getReviews(req: IRequest<any, IReviewQueryParams, any, any>) {
-    const { search = "", filter, page = 1, limit = 3 } = req.query;
+  async getReviews(req: IRequest<any, IReviewsQuery, any, any>) {
+    const { page = 1, limit = 3 } = req.query;
     const skip = (page - 1) * limit;
-    const data = await this.reviewService.findAll(search, filter, skip, limit);
+    const filter = req.query;
+    const query = buildReviewQuery(filter);
+    const data = await this.reviewService.findAll(query, skip, limit);
     return data;
   }
 

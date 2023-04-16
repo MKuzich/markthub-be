@@ -4,7 +4,6 @@ import CategoryService from "../services/category.service";
 import UserService from "../services/user.service";
 import {
   IProduct,
-  IProductsQueryParams,
   IProductCreate,
   IProductChangeData,
   IProductsQuery,

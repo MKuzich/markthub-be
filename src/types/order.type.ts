@@ -57,9 +57,9 @@ export interface IOrderChange {
   updatedAt?: Date;
 }
 
-export interface IOrderQueryParams extends ParamsDictionary {
-  search: string;
-  filter: string;
+export interface IOrderQueryPagination extends ParamsDictionary {
   page: string;
   limit: string;
 }
+
+export interface IOrderFilter {}

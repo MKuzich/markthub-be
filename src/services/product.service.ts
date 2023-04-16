@@ -16,7 +16,7 @@ const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 export default class ProductService {
   async findAll(query: IProductQuery, skip: number, limit: number) {
     const products = await Product.find(query).skip(skip).limit(limit);
-    const total = await Product.find().countDocuments();
+    const total = await Product.find(query).countDocuments();
     return { products, total };
   }
 

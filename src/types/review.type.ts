@@ -10,11 +10,33 @@ export interface IReview {
   rate: number;
 }
 
-export interface IReviewQueryParams extends ParamsDictionary {
-  search: string;
-  filter: string;
+export interface IReviewPagination extends ParamsDictionary {
   page: string;
   limit: string;
+}
+
+export interface IReviewFilter {
+  owner?: string;
+  product?: string;
+  rate?: { min?: number; max?: number };
+  search?: string;
+}
+
+export type IReviewsQuery = IReviewPagination & IReviewFilter;
+
+export interface IReviewQuery {
+  owner?: string;
+  product?: string;
+  rate?: {
+    $gte?: number;
+    $lte?: number;
+  };
+  $and?: Array<{
+    $or: Array<{
+      header: RegExp;
+      description: RegExp;
+    }>;
+  }>;
 }
 
 export interface IReviewCreate {

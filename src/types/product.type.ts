@@ -80,7 +80,7 @@ export interface IProductOrdered {
   reviews: string[];
 }
 
-export interface IProductsQueryParams extends ParamsDictionary {
+export interface IProductPagination extends ParamsDictionary {
   page: string;
   limit: string;
 }
@@ -99,7 +99,7 @@ export interface IProductFilter {
   search?: string;
 }
 
-export type IProductsQuery = IProductsQueryParams & IProductFilter;
+export type IProductsQuery = IProductPagination & IProductFilter;
 
 export interface IProductQuery {
   category?: string;
@@ -130,14 +130,10 @@ export interface IProductQuery {
   quantity?: {
     $gte: number;
   };
-  $and?: {
-    $or: {
-      header: {
-        $regex: RegExp;
-      };
-      description: {
-        $regex: RegExp;
-      };
-    }[];
-  }[];
+  $and?: Array<{
+    $or: Array<{
+      header: RegExp;
+      description: RegExp;
+    }>;
+  }>;
 }
