@@ -1,60 +1,54 @@
 import { ParamsDictionary } from "express-serve-static-core";
+import { Types } from "mongoose";
 
 export interface IProductsInOrder {
-  order: string;
+  order: Types.ObjectId;
   quantity: number;
 }
 
 export interface IProduct {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
-  category: string;
+  category: Types.ObjectId;
   images?: string[];
   price: number;
   promoPrice: number;
   description: string;
-  owner: string;
+  owner: Types.ObjectId;
   active: boolean;
   rate: number;
   ordersPerDay: number;
   totalOrders: number;
   date: Date;
-  reviews: string[];
+  reviews: Types.ObjectId[];
   orders: IProductsInOrder[];
   quantity: number;
 }
 
 export interface IProductCreate {
   name: string;
-  category: string;
+  category: Types.ObjectId;
   images?: string[];
   price: number;
   promoPrice?: number;
   description: string;
-  owner: string;
   quantity: number;
-  ordersPerDay?: number;
-  totalOrders?: number;
 }
 
 export interface IProductsQuantity {
-  product: string;
+  product: Types.ObjectId;
   amount: number;
 }
 
 export interface IProductChangeData {
   name?: string;
-  category?: string;
+  category?: Types.ObjectId;
   images?: string[];
   price?: number;
   promoPrice?: number;
   description?: string;
   active?: boolean;
-  rate?: number;
-  reviews?: string[];
   quantity?: number;
-  ordersPerDay?: number;
-  totalOrders?: number;
 }
 
 export interface IProductChange {
@@ -63,21 +57,21 @@ export interface IProductChange {
 }
 
 export interface IProductOrdered {
-  _id: string;
+  _id: Types.ObjectId;
   name: string;
-  category: string;
+  category: Types.ObjectId;
   images?: string[];
   price: number;
   promoPrice: number;
   description: string;
   active: boolean;
-  owner: string;
+  owner: Types.ObjectId;
   ordersPerDay: number;
   totalOrders: number;
   rate: number;
   date: Date;
   quantity: number;
-  reviews: string[];
+  reviews: Types.ObjectId[];
 }
 
 export interface ISortObject {

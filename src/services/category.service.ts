@@ -1,6 +1,7 @@
 import Category from "../models/Category";
 import { ICategoryCreate } from "../types/category.type";
 import { createError } from "../helpers/errors";
+import { Types } from "mongoose";
 
 export default class CategoryService {
   async findAll() {
@@ -18,7 +19,7 @@ export default class CategoryService {
     return createdCategory;
   }
 
-  async addProduct(categoryId: string, productId: string) {
+  async addProduct(categoryId: Types.ObjectId, productId: Types.ObjectId) {
     const category = await Category.findByIdAndUpdate(
       categoryId,
       {
@@ -32,7 +33,7 @@ export default class CategoryService {
     return true;
   }
 
-  async deleteProduct(categoryId: string, productId: string) {
+  async deleteProduct(categoryId: Types.ObjectId, productId: Types.ObjectId) {
     const category = await Category.findByIdAndUpdate(
       categoryId,
       {

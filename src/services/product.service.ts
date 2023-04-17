@@ -11,6 +11,7 @@ import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
 import { checkOwner } from "../helpers/checkOwner";
 import { ISortObject } from "../types/product.type";
+import { Types } from "mongoose";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
@@ -59,7 +60,7 @@ export default class ProductService {
     return data;
   }
 
-  async addOrder(products: IProductsQuantity[], orderId: string) {
+  async addOrder(products: IProductsQuantity[], orderId: Types.ObjectId) {
     const selectedProducts = await Product.find({
       $or: products.map(({ product }) => {
         return { product };
@@ -72,8 +73,8 @@ export default class ProductService {
 
     const isNotEnoughQuantity = selectedProducts.some(
       ({ _id, quantity }) =>
-        products.find(({ product }) => product === _id.toString())!.amount >
-        quantity
+        products.find(({ product }) => product.toString() === _id.toString())!
+          .amount > quantity
     );
     if (isNotEnoughQuantity) {
       return createError(400, `An insufficient amount of products at stock!`);
@@ -81,7 +82,8 @@ export default class ProductService {
 
     const changeProductsPromises = products.map(({ product, amount }) => {
       const selectedProduct = selectedProducts.find(
-        (selectedProduct) => selectedProduct._id.toString() === product
+        (selectedProduct) =>
+          selectedProduct._id.toString() === product.toString()
       )!;
       return Product.findByIdAndUpdate(
         product,

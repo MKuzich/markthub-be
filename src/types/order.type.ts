@@ -1,13 +1,14 @@
 import { ParamsDictionary } from "express-serve-static-core";
+import { Types } from "mongoose";
 
 export interface IOrderedProducts {
-  product: string;
+  product: Types.ObjectId;
   amount: number;
 }
 
 export interface IOrder {
-  _id: string;
-  owner: string;
+  _id: Types.ObjectId;
+  owner: Types.ObjectId;
   destination: {
     firstName: string;
     secondName: string;
@@ -73,7 +74,7 @@ export interface IOrderFilter {
 export type IOrdersQuery = IOrderPagination & IOrderFilter;
 
 export interface IOrderQuery {
-  owner?: string;
+  owner?: Types.ObjectId;
   status?: "Pending" | "Paid" | "Shipped" | "Delivered" | "Canceled";
   createdAt?: {
     from?: Date;

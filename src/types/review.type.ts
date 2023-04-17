@@ -1,10 +1,11 @@
 import { ParamsDictionary } from "express-serve-static-core";
+import { Types } from "mongoose";
 
 export interface IReview {
-  id: string;
+  _id: Types.ObjectId;
   date: Date;
-  owner: string;
-  product: string;
+  owner: Types.ObjectId;
+  product: Types.ObjectId;
   title: string;
   text: string;
   rate: number;
@@ -41,7 +42,7 @@ export interface IReviewQuery {
 }
 
 export interface IReviewCreate {
-  product: string;
+  product: Types.ObjectId;
   title: string;
   text: string;
   rate: number;

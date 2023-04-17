@@ -1,10 +1,12 @@
+import { Types } from "mongoose";
+
 export interface ICategory {
-  id: string;
+  _id: Types.ObjectId;
   name: string;
   tag: string;
   desription: string;
   image: string;
-  products: string[];
+  products: Types.ObjectId[];
 }
 
 export interface ICategoryCreate {

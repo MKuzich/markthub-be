@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import User from "../models/User";
 import { IUserChangeData } from "../types/user.type";
 import { IFile } from "../types/file.type";
+import { Types } from "mongoose";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
@@ -120,7 +121,7 @@ export default class UserService {
     return true;
   }
 
-  async addProduct(userId: string, productId: string) {
+  async addProduct(userId: string, productId: Types.ObjectId) {
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -134,7 +135,7 @@ export default class UserService {
     return true;
   }
 
-  async deleteProduct(userId: string, productId: string) {
+  async deleteProduct(userId: string, productId: Types.ObjectId) {
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -148,7 +149,7 @@ export default class UserService {
     return true;
   }
 
-  async addOrder(userId: string, orderId: string) {
+  async addOrder(userId: string, orderId: Types.ObjectId) {
     const user = await User.findByIdAndUpdate(
       userId,
       {

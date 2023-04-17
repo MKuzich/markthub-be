@@ -3,19 +3,52 @@ import { Model, model, Schema } from "mongoose";
 import Joi from "joi";
 import { IUser } from "../types/user.type";
 
-export const schemaSignUpUser = Joi.object({
+// export const schemaSignUpUser = Joi.object({
+//   phone: Joi.string().required(),
+//   name: Joi.string().required(),
+//   email: Joi.string()
+//     .required()
+//     .email()
+//     .regex(
+//       /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
+//     ),
+//   password: Joi.string()
+//     .required()
+//     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/),
+// });
+
+export const createUserSchema = Joi.object({
   phone: Joi.string().required(),
-  name: Joi.string().required(),
   email: Joi.string()
-    .required()
     .email()
-    .regex(
-      /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-    ),
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    .required(),
   password: Joi.string()
-    .required()
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/),
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required(),
+  firstName: Joi.string().required(),
+  secondName: Joi.string().required(),
+  image: Joi.string().allow(null),
 });
+
+export const changeUserDataSchema = Joi.object({
+  firstName: Joi.string(),
+  secondName: Joi.string(),
+  image: Joi.string().allow(null),
+});
+
+export const changeUserPasswordSchema = Joi.object({
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string().required(),
+});
+
+export const userLogInSchema = Joi.object({
+  phone: Joi.string(),
+  email: Joi.string().email(),
+  password: Joi.string().required(),
+}).or("phone", "email");
 
 const userSchema = new Schema<IUser>({
   phone: {

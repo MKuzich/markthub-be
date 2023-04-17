@@ -1,7 +1,39 @@
-import { Model, model, Schema } from "mongoose";
+import { Model, model, Schema, Types } from "mongoose";
 import Joi from "joi";
-
 import { IProduct } from "../types/product.type";
+
+export const createProductSchema = Joi.object({
+  name: Joi.string().required(),
+  category: Joi.string()
+    .custom((value, helpers) => {
+      if (!Types.ObjectId.isValid(value)) {
+        return helpers.error("any.invalid");
+      }
+      return value;
+    })
+    .required(),
+  images: Joi.array().items(Joi.string()),
+  price: Joi.number().required(),
+  promoPrice: Joi.number().default(0),
+  description: Joi.string().required(),
+  quantity: Joi.number().required(),
+});
+
+export const changeProductDataSchema = Joi.object({
+  name: Joi.string(),
+  category: Joi.string().custom((value, helpers) => {
+    if (!Types.ObjectId.isValid(value)) {
+      return helpers.error("any.invalid");
+    }
+    return value;
+  }),
+  images: Joi.array().items(Joi.string()),
+  price: Joi.number(),
+  promoPrice: Joi.number(),
+  description: Joi.string(),
+  active: Joi.boolean(),
+  quantity: Joi.number(),
+});
 
 const productSchema = new Schema<IProduct>({
   name: {
@@ -9,7 +41,7 @@ const productSchema = new Schema<IProduct>({
     required: true,
   },
   category: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: "Category",
     required: true,
   },
@@ -31,7 +63,7 @@ const productSchema = new Schema<IProduct>({
     required: true,
   },
   owner: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: "User",
   },
   active: {
@@ -56,7 +88,7 @@ const productSchema = new Schema<IProduct>({
   },
   reviews: [
     {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: "Review",
     },
   ],
@@ -65,7 +97,7 @@ const productSchema = new Schema<IProduct>({
       {
         product: {
           type: {
-            type: String,
+            type: Schema.Types.ObjectId,
             ref: "Order",
           },
         },
