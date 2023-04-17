@@ -39,20 +39,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var products_service_1 = __importDefault(require("../services/products.service"));
-var ProductsController = /** @class */ (function () {
-    function ProductsController(productsService) {
-        this.productsService = productsService;
+var product_service_1 = __importDefault(require("../services/product.service"));
+var category_service_1 = __importDefault(require("../services/category.service"));
+var user_service_1 = __importDefault(require("../services/user.service"));
+var buildProductQuery_1 = require("../helpers/buildProductQuery");
+var parseSortParameter_1 = require("../helpers/parseSortParameter");
+var ProductController = /** @class */ (function () {
+    function ProductController(productService, categoryService, userService) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+        this.userService = userService;
     }
-    ProductsController.prototype.getProducts = function (req) {
+    ProductController.prototype.getProducts = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, _b, search, filter, _c, page, _d, limit, skip, data;
+            var _a, _b, page, _c, limit, _d, sort, skip, filter, query, sortObj, data;
             return __generator(this, function (_e) {
                 switch (_e.label) {
                     case 0:
-                        _a = req.query, _b = _a.search, search = _b === void 0 ? "" : _b, filter = _a.filter, _c = _a.page, page = _c === void 0 ? 1 : _c, _d = _a.limit, limit = _d === void 0 ? 10 : _d;
+                        _a = req.query, _b = _a.page, page = _b === void 0 ? 1 : _b, _c = _a.limit, limit = _c === void 0 ? 10 : _c, _d = _a.sort, sort = _d === void 0 ? undefined : _d;
                         skip = (page - 1) * limit;
-                        return [4 /*yield*/, this.productsService.findAll(search, filter, skip, limit)];
+                        filter = req.query;
+                        query = (0, buildProductQuery_1.buildProductQuery)(filter);
+                        sortObj = (0, parseSortParameter_1.parseSortParameter)(sort);
+                        return [4 /*yield*/, this.productService.findAll(query, skip, limit, sortObj)];
                     case 1:
                         data = _e.sent();
                         return [2 /*return*/, data];
@@ -60,14 +69,14 @@ var ProductsController = /** @class */ (function () {
             });
         });
     };
-    ProductsController.prototype.getProductById = function (req) {
+    ProductController.prototype.getProductById = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, product;
+            var productId, product;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
-                        return [4 /*yield*/, this.productsService.findById(id)];
+                        productId = req.params.productId;
+                        return [4 /*yield*/, this.productService.findById(productId)];
                     case 1:
                         product = _a.sent();
                         return [2 /*return*/, product];
@@ -75,12 +84,13 @@ var ProductsController = /** @class */ (function () {
             });
         });
     };
-    ProductsController.prototype.addProduct = function (req) {
+    ProductController.prototype.addProduct = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, images, fileArray, product;
+            var id, data, images, fileArray, product;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        id = req.user.id;
                         data = req.body;
                         images = req.files;
                         fileArray = [];
@@ -90,47 +100,61 @@ var ProductsController = /** @class */ (function () {
                         else if (typeof images === "object" && images !== null) {
                             fileArray = Object.values(images).flat();
                         }
-                        return [4 /*yield*/, this.productsService.add(data, fileArray)];
+                        return [4 /*yield*/, this.productService.add(id, data, fileArray)];
                     case 1:
                         product = _a.sent();
+                        return [4 /*yield*/, this.userService.addProduct(id, product._id)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.categoryService.addProduct(product.category, product._id)];
+                    case 3:
+                        _a.sent();
                         return [2 /*return*/, product];
                 }
             });
         });
     };
-    ProductsController.prototype.changeProduct = function (req) {
+    ProductController.prototype.changeProduct = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, data, product;
+            var productId, id, data, isUpdated;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
+                        productId = req.params.productId;
+                        id = req.user.id;
                         data = req.body;
-                        return [4 /*yield*/, this.productsService.change(id, data)];
+                        return [4 /*yield*/, this.productService.change(id, productId, data)];
                     case 1:
-                        product = _a.sent();
-                        return [2 /*return*/, product];
+                        isUpdated = _a.sent();
+                        return [2 /*return*/, isUpdated];
                 }
             });
         });
     };
-    ProductsController.prototype.deleteProduct = function (req) {
+    ProductController.prototype.deleteProduct = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, product;
+            var productId, id, product;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        id = req.params.id;
-                        return [4 /*yield*/, this.productsService.delete(id)];
+                        productId = req.params.productId;
+                        id = req.user.id;
+                        return [4 /*yield*/, this.productService.delete(id, productId)];
                     case 1:
                         product = _a.sent();
+                        return [4 /*yield*/, this.userService.deleteProduct(id, product._id)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.categoryService.deleteProduct(product.category, product._id)];
+                    case 3:
+                        _a.sent();
                         return [2 /*return*/, product];
                 }
             });
         });
     };
-    return ProductsController;
+    return ProductController;
 }());
-var productsController = new ProductsController(new products_service_1.default());
-exports.default = productsController;
+var productController = new ProductController(new product_service_1.default(), new category_service_1.default(), new user_service_1.default());
+exports.default = productController;
 //# sourceMappingURL=products.controller.js.map

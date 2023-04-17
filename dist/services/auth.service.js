@@ -52,12 +52,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var storage_blob_1 = require("@azure/storage-blob");
 var crypto_1 = __importDefault(require("crypto"));
 var User_1 = __importDefault(require("../models/User"));
 var PasswordReset_1 = __importDefault(require("../models/PasswordReset"));
 var errors_1 = require("../helpers/errors");
 var uuid_1 = require("uuid");
-var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION_TIME = _a.ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRATION_TIME = _a.REFRESH_TOKEN_EXPIRATION_TIME, ENCRYPTION_KEY = _a.ENCRYPTION_KEY;
+var _a = process.env, ACCESS_TOKEN_SECRET = _a.ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRATION_TIME = _a.ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_SECRET = _a.REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRATION_TIME = _a.REFRESH_TOKEN_EXPIRATION_TIME, ENCRYPTION_KEY = _a.ENCRYPTION_KEY, AZURE_STORAGE_CONNECTION_STRING = _a.AZURE_STORAGE_CONNECTION_STRING;
 var AuthService = /** @class */ (function () {
     function AuthService() {
     }
@@ -114,25 +115,29 @@ var AuthService = /** @class */ (function () {
             });
         });
     };
-    AuthService.prototype.getUserByEmail = function (email) {
+    AuthService.prototype.verifyEmail = function (email, id) {
         return __awaiter(this, void 0, void 0, function () {
-            var user;
+            var user, emailChangeToken;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, User_1.default.findOne({ email: email })];
                     case 1:
                         user = _a.sent();
-                        if (!user) {
-                            throw (0, errors_1.createError)(409, "Wrong email.");
+                        if (user) {
+                            throw (0, errors_1.createError)(409, "Email already in use.");
                         }
-                        return [2 /*return*/, user];
+                        emailChangeToken = (0, uuid_1.v4)();
+                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, { emailChangeToken: emailChangeToken, newEmail: email })];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, emailChangeToken];
                 }
             });
         });
     };
-    AuthService.prototype.signUp = function (userData) {
+    AuthService.prototype.signUp = function (userData, file) {
         return __awaiter(this, void 0, void 0, function () {
-            var email, password, userByEmail, hashedPassword, verificationToken;
+            var email, password, userByEmail, hashedPassword, verificationToken, newUser, containerName, blobServiceClient, containerClient, upload, filename, blobClient;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -147,8 +152,28 @@ var AuthService = /** @class */ (function () {
                     case 2:
                         hashedPassword = _a.sent();
                         verificationToken = (0, uuid_1.v4)();
-                        return [4 /*yield*/, User_1.default.create(__assign(__assign({}, userData), { password: hashedPassword, verificationToken: verificationToken }))];
+                        newUser = __assign(__assign({}, userData), { password: hashedPassword, verificationToken: verificationToken });
+                        if (!file) return [3 /*break*/, 5];
+                        containerName = "users";
+                        blobServiceClient = storage_blob_1.BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+                        containerClient = blobServiceClient.getContainerClient(containerName);
+                        upload = file;
+                        if (!upload) return [3 /*break*/, 4];
+                        filename = (0, uuid_1.v4)() + "-" + upload.originalname;
+                        blobClient = containerClient.getBlockBlobClient(filename);
+                        return [4 /*yield*/, blobClient.uploadData(upload.buffer, {
+                                blobHTTPHeaders: { blobContentType: upload.mimetype },
+                            })];
                     case 3:
+                        _a.sent();
+                        newUser.image = blobClient.url;
+                        _a.label = 4;
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
+                        newUser.image = null;
+                        _a.label = 6;
+                    case 6: return [4 /*yield*/, User_1.default.create(newUser)];
+                    case 7:
                         _a.sent();
                         return [2 /*return*/, verificationToken];
                 }
@@ -239,33 +264,6 @@ var AuthService = /** @class */ (function () {
             });
         });
     };
-    AuthService.prototype.getCurrent = function (id) {
-        return __awaiter(this, void 0, void 0, function () {
-            var user, phone, email, firstName, secondName, image, rate, date, reviews, _id;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, User_1.default.findById(id)];
-                    case 1:
-                        user = _a.sent();
-                        if (!user) {
-                            throw (0, errors_1.createError)(409, "Undefined user.");
-                        }
-                        phone = user.phone, email = user.email, firstName = user.firstName, secondName = user.secondName, image = user.image, rate = user.rate, date = user.date, reviews = user.reviews, _id = user._id;
-                        return [2 /*return*/, {
-                                phone: phone,
-                                email: email,
-                                firstName: firstName,
-                                secondName: secondName,
-                                image: image,
-                                rate: rate,
-                                date: date,
-                                reviews: reviews,
-                                _id: _id,
-                            }];
-                }
-            });
-        });
-    };
     AuthService.prototype.logOut = function (id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -283,7 +281,7 @@ var AuthService = /** @class */ (function () {
     };
     AuthService.prototype.createPasswordReset = function (id) {
         return __awaiter(this, void 0, void 0, function () {
-            var token, iv, cipher, encryptedToken, createdPasswordReset;
+            var token, iv, cipher, encryptedToken, createdPasswordReset, newPasswordReset;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -297,61 +295,112 @@ var AuthService = /** @class */ (function () {
                         createdPasswordReset = _a.sent();
                         if (!createdPasswordReset) return [3 /*break*/, 3];
                         return [4 /*yield*/, PasswordReset_1.default.findByIdAndUpdate(createdPasswordReset._id, {
-                                encryptedToken: encryptedToken,
+                                token: token,
                                 iv: iv,
-                            })];
+                            }, { new: true })];
                     case 2:
-                        _a.sent();
+                        newPasswordReset = _a.sent();
                         return [3 /*break*/, 5];
                     case 3: return [4 /*yield*/, PasswordReset_1.default.create({
                             user: id,
-                            decryptedToken: token,
+                            token: token,
                             iv: iv,
                         })];
                     case 4:
-                        _a.sent();
+                        newPasswordReset = _a.sent();
                         _a.label = 5;
-                    case 5: return [2 /*return*/, token];
-                }
-            });
-        });
-    };
-    AuthService.prototype.resetPassword = function (encryptedToken, newPassword) {
-        return __awaiter(this, void 0, void 0, function () {
-            var passwordReset, user, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, PasswordReset_1.default.findOne({
-                            encryptedToken: encryptedToken,
-                        }).populate("user")];
-                    case 1:
-                        passwordReset = _b.sent();
-                        if (!passwordReset) {
-                            return [2 /*return*/, res
-                                    .status(400)
-                                    .json({ message: "Invalid or expired password reset token" })];
+                    case 5:
+                        if (!newPasswordReset) {
+                            throw (0, errors_1.createError)(500, "Cannot change password now");
                         }
-                        user = passwordReset.user;
-                        _a = user;
-                        return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
-                    case 2:
-                        _a.password = _b.sent();
-                        return [4 /*yield*/, user.save()];
-                    case 3:
-                        _b.sent();
-                        return [4 /*yield*/, passwordReset.deleteOne()];
-                    case 4:
-                        _b.sent();
-                        res.status(200).json({ message: "Password reset successful" });
-                        return [2 /*return*/];
+                        return [2 /*return*/, { encryptedToken: encryptedToken, id: newPasswordReset._id }];
                 }
             });
         });
     };
-    AuthService.prototype.changePassword = function () {
-        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
-            return [2 /*return*/];
-        }); });
+    AuthService.prototype.resetPassword = function (encryptedToken, newPassword, passwordId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var passwordReset, decipher, decryptedToken, hashedPassword;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, PasswordReset_1.default.findById(passwordId)];
+                    case 1:
+                        passwordReset = _a.sent();
+                        if (!passwordReset) {
+                            throw (0, errors_1.createError)(400, "Invalid or expired password reset token.");
+                        }
+                        decipher = crypto_1.default.createDecipheriv("aes-256-cbc", ENCRYPTION_KEY, passwordReset.iv);
+                        decryptedToken = decipher.update(encryptedToken, "base64", "utf8");
+                        decryptedToken += decipher.final("utf8");
+                        if (!(decryptedToken !== passwordReset.token)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, PasswordReset_1.default.findByIdAndRemove(passwordId)];
+                    case 2:
+                        _a.sent();
+                        throw (0, errors_1.createError)(400, "Invalid or expired token.");
+                    case 3: return [4 /*yield*/, bcryptjs_1.default.hash(newPassword, 10)];
+                    case 4:
+                        hashedPassword = _a.sent();
+                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(passwordReset.user, {
+                                password: hashedPassword,
+                            })];
+                    case 5:
+                        _a.sent();
+                        return [4 /*yield*/, PasswordReset_1.default.findByIdAndRemove(passwordId)];
+                    case 6:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    AuthService.prototype.resetEmail = function (emailChangeToken) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, changedUser;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findOne({ emailChangeToken: emailChangeToken })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "Token not found. Try again.");
+                        }
+                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(user._id, { email: user.newEmail, emailChangeToken: null, newEmail: null }, { new: true })];
+                    case 2:
+                        changedUser = _a.sent();
+                        return [2 /*return*/, changedUser];
+                }
+            });
+        });
+    };
+    AuthService.prototype.changePassword = function (id, data) {
+        return __awaiter(this, void 0, void 0, function () {
+            var newPassword, oldPassword, user, isPasswordMatch, hashedPassword;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        newPassword = data.newPassword, oldPassword = data.oldPassword;
+                        return [4 /*yield*/, User_1.default.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
+                        }
+                        return [4 /*yield*/, bcryptjs_1.default.compare(oldPassword, user.password)];
+                    case 2:
+                        isPasswordMatch = _a.sent();
+                        if (!isPasswordMatch) {
+                            throw (0, errors_1.createError)(401, "Invalid credentials.");
+                        }
+                        return [4 /*yield*/, bcryptjs_1.default.hash(newPassword, 10)];
+                    case 3:
+                        hashedPassword = _a.sent();
+                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, { password: hashedPassword })];
+                    case 4:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
     };
     return AuthService;
 }());

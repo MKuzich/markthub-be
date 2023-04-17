@@ -7,7 +7,7 @@ var passwordResetSchema = new mongoose_1.Schema({
         ref: "User",
         required: true,
     },
-    decryptedToken: {
+    token: {
         type: String,
         required: true,
     },

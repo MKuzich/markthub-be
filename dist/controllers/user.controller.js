@@ -41,72 +41,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var user_service_1 = __importDefault(require("../services/user.service"));
-var errors_1 = require("../helpers/errors");
 var UserController = /** @class */ (function () {
     function UserController(userService) {
         this.userService = userService;
     }
-    UserController.prototype.register = function (req) {
+    UserController.prototype.changeUserData = function (req) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var data, token;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var data, image, id, isChanged;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         data = req.body;
-                        return [4 /*yield*/, this.userService.signUp(data)];
+                        image = (_a = req.file) !== null && _a !== void 0 ? _a : null;
+                        id = req.user.id;
+                        return [4 /*yield*/, this.userService.changeData(id, data, image)];
                     case 1:
-                        token = _a.sent();
-                        return [2 /*return*/, token];
-                }
-            });
-        });
-    };
-    UserController.prototype.logIn = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var data, token;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        data = req.body;
-                        return [4 /*yield*/, this.userService.logIn(data)];
-                    case 1:
-                        token = _a.sent();
-                        return [2 /*return*/, token];
-                }
-            });
-        });
-    };
-    UserController.prototype.logOut = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        id = req.user ? req.user._id : null;
-                        if (!!id) return [3 /*break*/, 1];
-                        (0, errors_1.createError)(401, 'Already unauthorized!');
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, this.userService.logOut(id)];
-                    case 2:
-                        result = _a.sent();
-                        return [2 /*return*/, result];
-                    case 3: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UserController.prototype.changePassword = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var data, id, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        data = req.body;
-                        id = req.user ? req.user._id : null;
-                        return [4 /*yield*/, this.userService.changePassword(id, data)];
-                    case 1:
-                        result = _a.sent();
-                        return [2 /*return*/, result];
+                        isChanged = _b.sent();
+                        return [2 /*return*/, isChanged];
                 }
             });
         });

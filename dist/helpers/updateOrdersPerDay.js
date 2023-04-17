@@ -41,28 +41,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateOrdersPerDay = void 0;
 var Product_1 = __importDefault(require("../models/Product"));
+var errors_1 = require("./errors");
 function updateOrdersPerDay() {
     return __awaiter(this, void 0, void 0, function () {
-        var products;
-        var _this = this;
+        var err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, Product_1.default.find()];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, Product_1.default.updateMany({}, { ordersPerDay: 0 })];
                 case 1:
-                    products = _a.sent();
-                    products.forEach(function (product) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    product.ordersPerDay = 0;
-                                    return [4 /*yield*/, product.save()];
-                                case 1:
-                                    _a.sent();
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); });
-                    return [2 /*return*/];
+                    _a.sent();
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    throw (0, errors_1.createError)(500, "OrdersPerDay didn't update.");
+                case 3: return [2 /*return*/];
             }
         });
     });

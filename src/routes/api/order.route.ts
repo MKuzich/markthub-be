@@ -14,7 +14,7 @@ orderRouter.get(
 );
 
 orderRouter.get(
-  "/:id",
+  "/:orderId",
   auth,
   tryCatch(orderController.getOrderById.bind(orderController))
 );
@@ -27,7 +27,7 @@ orderRouter.post(
 );
 
 orderRouter.patch(
-  "/:id",
+  "/:orderId",
   auth,
   validateRequest(changeOrderSchema),
   tryCatch(orderController.changeOrder.bind(orderController))

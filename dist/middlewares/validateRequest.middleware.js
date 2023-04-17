@@ -5,7 +5,7 @@ var errors_1 = require("../helpers/errors");
 var validateRequest = function (schema) { return function (req, _, next) {
     var error = schema.validate(req.body).error;
     if (error) {
-        next((0, errors_1.createError)(400, 'Fields validate error!'));
+        throw (0, errors_1.createError)(400, error.message);
     }
     else {
         next();

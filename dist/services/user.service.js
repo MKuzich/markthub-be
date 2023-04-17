@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,139 +50,190 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var bcryptjs_1 = __importDefault(require("bcryptjs"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var User_1 = __importDefault(require("../models/User"));
 var errors_1 = require("../helpers/errors");
-var JWT_SECRET = process.env.JWT_SECRET;
+var storage_blob_1 = require("@azure/storage-blob");
+var uuid_1 = require("uuid");
+var User_1 = __importDefault(require("../models/User"));
+var AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
 var UserService = /** @class */ (function () {
     function UserService() {
     }
-    UserService.authenticate = function (token) {
+    UserService.prototype.getUserByEmail = function (email) {
         return __awaiter(this, void 0, void 0, function () {
-            var id, user, e_1;
+            var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        id = jsonwebtoken_1.default.verify(token, JWT_SECRET).id;
-                        if (!id) {
-                            throw (0, errors_1.createError)(401, "Not authorized");
-                        }
-                        return [4 /*yield*/, User_1.default.findById(id)];
-                    case 1:
-                        user = _a.sent();
-                        if (!user || !user.token) {
-                            throw (0, errors_1.createError)(401, "Invalid token");
-                        }
-                        if (user.token !== token) {
-                            throw (0, errors_1.createError)(401, "Bad credential");
-                        }
-                        return [2 /*return*/, user];
-                    case 2:
-                        e_1 = _a.sent();
-                        return [2 /*return*/, null];
-                    case 3: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    UserService.prototype.signUp = function (data) {
-        return __awaiter(this, void 0, void 0, function () {
-            var email, password, checkUser, hashedPassword, user, token, updatedUser;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        email = data.email, password = data.password;
-                        return [4 /*yield*/, User_1.default.findOne({ email: email })];
-                    case 1:
-                        checkUser = _a.sent();
-                        if (checkUser) {
-                            throw (0, errors_1.createError)(409, "Email already in use.");
-                        }
-                        return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
-                    case 2:
-                        hashedPassword = _a.sent();
-                        return [4 /*yield*/, User_1.default.create({ email: email, password: hashedPassword })];
-                    case 3:
-                        user = _a.sent();
-                        token = jsonwebtoken_1.default.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
-                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(user._id, { token: token }, { new: true })];
-                    case 4:
-                        updatedUser = _a.sent();
-                        if (!updatedUser) {
-                            throw (0, errors_1.createError)(500, "Unknown error in creating new user");
-                        }
-                        return [2 /*return*/, updatedUser.token];
-                }
-            });
-        });
-    };
-    UserService.prototype.logIn = function (data) {
-        return __awaiter(this, void 0, void 0, function () {
-            var email, password, user, isValid, token;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        email = data.email, password = data.password;
-                        return [4 /*yield*/, User_1.default.findOne({ email: email })];
+                    case 0: return [4 /*yield*/, User_1.default.findOne({ email: email })];
                     case 1:
                         user = _a.sent();
                         if (!user) {
-                            throw (0, errors_1.createError)(401, "Email or password is wrong.");
+                            throw (0, errors_1.createError)(409, "Wrong email.");
                         }
-                        return [4 /*yield*/, bcryptjs_1.default.compare(password, user.password)];
-                    case 2:
-                        isValid = _a.sent();
-                        if (!isValid) {
-                            throw (0, errors_1.createError)(401, "Email or password is wrong");
-                        }
-                        token = jsonwebtoken_1.default.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
-                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(user._id, { token: token })];
-                    case 3:
-                        _a.sent();
-                        return [2 /*return*/, token];
+                        return [2 /*return*/, user];
                 }
             });
         });
     };
-    UserService.prototype.logOut = function (id) {
+    UserService.prototype.changeData = function (id, data, file) {
+        if (file === void 0) { file = null; }
         return __awaiter(this, void 0, void 0, function () {
+            var newUsersData, containerName, blobServiceClient, containerClient, upload, filename, blobClient, user, oldImageParts, oldImage, oldBlobClient;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, { token: null })];
+                    case 0:
+                        newUsersData = __assign({}, data);
+                        if (!file) return [3 /*break*/, 6];
+                        containerName = "users";
+                        blobServiceClient = storage_blob_1.BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+                        containerClient = blobServiceClient.getContainerClient(containerName);
+                        upload = file;
+                        if (!upload) return [3 /*break*/, 4];
+                        filename = (0, uuid_1.v4)() + "-" + upload.originalname;
+                        blobClient = containerClient.getBlockBlobClient(filename);
+                        return [4 /*yield*/, blobClient.uploadData(upload.buffer, {
+                                blobHTTPHeaders: { blobContentType: upload.mimetype },
+                            })];
                     case 1:
                         _a.sent();
+                        newUsersData.image = blobClient.url;
+                        return [4 /*yield*/, User_1.default.findById(id)];
+                    case 2:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
+                        }
+                        if (!user.image) return [3 /*break*/, 4];
+                        oldImageParts = user.image.split("/");
+                        oldImage = oldImageParts[oldImageParts.length - 1];
+                        oldBlobClient = containerClient.getBlockBlobClient(oldImage);
+                        return [4 /*yield*/, oldBlobClient.delete()];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, newUsersData)];
+                    case 5:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    UserService.prototype.getCurrent = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user, phone, email, firstName, secondName, image, rate, date, reviews, products, cart, orders, _id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findById(id)];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(409, "Undefined user.");
+                        }
+                        phone = user.phone, email = user.email, firstName = user.firstName, secondName = user.secondName, image = user.image, rate = user.rate, date = user.date, reviews = user.reviews, products = user.products, cart = user.cart, orders = user.orders, _id = user._id;
+                        return [2 /*return*/, {
+                                phone: phone,
+                                email: email,
+                                firstName: firstName,
+                                secondName: secondName,
+                                image: image,
+                                rate: rate,
+                                date: date,
+                                reviews: reviews,
+                                products: products,
+                                cart: cart,
+                                orders: orders,
+                                _id: _id,
+                            }];
+                }
+            });
+        });
+    };
+    UserService.prototype.addReview = function (userId, reviewId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(userId, {
+                            $push: { reviews: { $each: [reviewId], $position: 0 } },
+                        }, { new: true })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
+                        }
                         return [2 /*return*/, true];
                 }
             });
         });
     };
-    UserService.prototype.changePassword = function (id, data) {
+    UserService.prototype.deleteReview = function (userId, reviewId) {
         return __awaiter(this, void 0, void 0, function () {
-            var oldPassword, newPassword, email, user, isValid, hashedPassword;
+            var user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        oldPassword = data.oldPassword, newPassword = data.newPassword, email = data.email;
-                        return [4 /*yield*/, User_1.default.findById(id)];
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(userId, {
+                            $pull: { reviews: reviewId },
+                        }, { new: true })];
                     case 1:
                         user = _a.sent();
-                        if (!user || user.email !== email) {
-                            throw (0, errors_1.createError)(401, "Email or password is wrong.");
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
                         }
-                        return [4 /*yield*/, bcryptjs_1.default.compare(oldPassword, user.password)];
-                    case 2:
-                        isValid = _a.sent();
-                        if (!isValid) {
-                            throw (0, errors_1.createError)(401, "Email or password is wrong");
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    UserService.prototype.addProduct = function (userId, productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(userId, {
+                            $push: { products: { $each: [productId], $position: 0 } },
+                        }, { new: true })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
                         }
-                        return [4 /*yield*/, bcryptjs_1.default.hash(newPassword, 10)];
-                    case 3:
-                        hashedPassword = _a.sent();
-                        return [4 /*yield*/, User_1.default.findByIdAndUpdate(id, { password: hashedPassword })];
-                    case 4:
-                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    UserService.prototype.deleteProduct = function (userId, productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(userId, {
+                            $pull: { products: productId },
+                        }, { new: true })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
+                        }
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    UserService.prototype.addOrder = function (userId, orderId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, User_1.default.findByIdAndUpdate(userId, {
+                            $push: { orders: { $each: [orderId], $position: 0 } },
+                        }, { new: true })];
+                    case 1:
+                        user = _a.sent();
+                        if (!user) {
+                            throw (0, errors_1.createError)(404, "User not found.");
+                        }
                         return [2 /*return*/, true];
                 }
             });

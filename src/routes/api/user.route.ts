@@ -9,7 +9,7 @@ import { changeUserDataSchema } from "../../models/User";
 const userRouter: Router = Router();
 
 userRouter.patch(
-  "/:id",
+  "/",
   auth,
   parseAvatar(),
   validateRequest(changeUserDataSchema),

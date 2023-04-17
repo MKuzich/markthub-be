@@ -75,18 +75,39 @@ var EmailService = /** @class */ (function () {
             });
         });
     };
-    EmailService.prototype.sendChangePassword = function (email, resetToken) {
+    EmailService.prototype.sendChangePassword = function (email, resetToken, passwordId) {
         return __awaiter(this, void 0, void 0, function () {
             var resetLink, emailOptions;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        resetLink = "".concat(BASE_URL, "/api/auth/reset-password/").concat(encodeURIComponent(resetToken));
+                        resetLink = "".concat(BASE_URL, "/api/auth/reset-password/").concat(encodeURIComponent(resetToken), "/").concat(passwordId);
                         emailOptions = {
                             to: email,
                             from: MAIL,
                             subject: "Change your password for MarketHub account",
                             html: "<h4>Click on this link to change password on MarketHub shop ".concat(resetLink, "</h4><bold>If it you didn't click for password change just ignore this link!</bold>"),
+                        };
+                        return [4 /*yield*/, this.transporter.sendMail(emailOptions)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    EmailService.prototype.sendChangeEmail = function (email, emailChangeToken) {
+        return __awaiter(this, void 0, void 0, function () {
+            var verifyLink, emailOptions;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        verifyLink = "".concat(BASE_URL, "/api/auth/verify/").concat(emailChangeToken);
+                        emailOptions = {
+                            to: email,
+                            from: MAIL,
+                            subject: "Confirm changening your email for MarketHub account",
+                            html: "<h4>Click on this link to confirm changening email on MarketHub shop ".concat(verifyLink, "</h4>"),
                         };
                         return [4 /*yield*/, this.transporter.sendMail(emailOptions)];
                     case 1:

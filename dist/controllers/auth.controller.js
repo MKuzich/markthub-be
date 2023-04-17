@@ -42,25 +42,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 var auth_service_1 = __importDefault(require("../services/auth.service"));
 var email_service_1 = __importDefault(require("../services/email.service"));
+var user_service_1 = __importDefault(require("../services/user.service"));
 var errors_1 = require("../helpers/errors");
 var AuthController = /** @class */ (function () {
-    function AuthController(authService, emailService) {
+    function AuthController(authService, emailService, userService) {
         this.authService = authService;
         this.emailService = emailService;
+        this.userService = userService;
     }
     AuthController.prototype.signUpUser = function (req) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var data, verificationToken, isSent;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var data, image, verificationToken, isSent;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         data = req.body;
-                        return [4 /*yield*/, this.authService.signUp(data)];
+                        image = (_a = req.file) !== null && _a !== void 0 ? _a : null;
+                        return [4 /*yield*/, this.authService.signUp(data, image)];
                     case 1:
-                        verificationToken = _a.sent();
+                        verificationToken = _b.sent();
                         return [4 /*yield*/, this.emailService.sendEmailVerify(data.email, verificationToken)];
                     case 2:
-                        isSent = _a.sent();
+                        isSent = _b.sent();
                         if (!isSent) {
                             throw (0, errors_1.createError)(500, "Error sending email.");
                         }
@@ -97,9 +101,12 @@ var AuthController = /** @class */ (function () {
                         if (!email) {
                             throw (0, errors_1.createError)(400, "Missing required field email");
                         }
-                        return [4 /*yield*/, this.authService.getUserByEmail(email)];
+                        return [4 /*yield*/, this.userService.getUserByEmail(email)];
                     case 1:
                         user = _a.sent();
+                        if (!user.verificationToken) {
+                            throw (0, errors_1.createError)(409, "No verification token in user data.");
+                        }
                         return [4 /*yield*/, this.emailService.sendEmailVerify(email, user.verificationToken)];
                     case 2:
                         isSent = _a.sent();
@@ -138,7 +145,7 @@ var AuthController = /** @class */ (function () {
                             throw (0, errors_1.createError)(401, "Not authorized.");
                         }
                         id = req.user.id;
-                        return [4 /*yield*/, this.authService.getCurrent(id)];
+                        return [4 /*yield*/, this.userService.getCurrent(id)];
                     case 1:
                         user = _a.sent();
                         return [2 /*return*/, user];
@@ -164,22 +171,22 @@ var AuthController = /** @class */ (function () {
             });
         });
     };
-    AuthController.prototype.changeUserPassword = function (req) {
+    AuthController.prototype.changeForgottenUserPassword = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var email, user, token, isSent;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var email, user, _a, encryptedToken, id, isSent;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         email = req.body.email;
-                        return [4 /*yield*/, this.authService.getUserByEmail(email)];
+                        return [4 /*yield*/, this.userService.getUserByEmail(email)];
                     case 1:
-                        user = _a.sent();
+                        user = _b.sent();
                         return [4 /*yield*/, this.authService.createPasswordReset(user._id)];
                     case 2:
-                        token = _a.sent();
-                        return [4 /*yield*/, this.emailService.sendChangePassword(email, token)];
+                        _a = _b.sent(), encryptedToken = _a.encryptedToken, id = _a.id;
+                        return [4 /*yield*/, this.emailService.sendChangePassword(email, encryptedToken, id.toString())];
                     case 3:
-                        isSent = _a.sent();
+                        isSent = _b.sent();
                         return [2 /*return*/, isSent];
                 }
             });
@@ -187,16 +194,66 @@ var AuthController = /** @class */ (function () {
     };
     AuthController.prototype.resetUserPassword = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            var resetToken, newPassword, data;
+            var _a, resetToken, passwordId, newPassword, isChanged;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = req.params, resetToken = _a.resetToken, passwordId = _a.passwordId;
+                        newPassword = req.body.newPassword;
+                        return [4 /*yield*/, this.authService.resetPassword(resetToken, newPassword, passwordId)];
+                    case 1:
+                        isChanged = _b.sent();
+                        return [2 /*return*/, isChanged];
+                }
+            });
+        });
+    };
+    AuthController.prototype.changeUserEmail = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var email, id, emailChangeToken, isSent;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        resetToken = req.params.resetToken;
-                        newPassword = req.body.newPassword;
-                        return [4 /*yield*/, this.authService.resetPassword(resetToken, newPassword)];
+                        email = req.body.email;
+                        id = req.user.id;
+                        return [4 /*yield*/, this.authService.verifyEmail(email, id)];
                     case 1:
-                        data = _a.sent();
-                        return [2 /*return*/];
+                        emailChangeToken = _a.sent();
+                        return [4 /*yield*/, this.emailService.sendEmailVerify(email, emailChangeToken)];
+                    case 2:
+                        isSent = _a.sent();
+                        return [2 /*return*/, isSent];
+                }
+            });
+        });
+    };
+    AuthController.prototype.resetUserEmail = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var emailChangeToken, updatedUser;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        emailChangeToken = req.params.emailChangeToken;
+                        return [4 /*yield*/, this.authService.resetEmail(emailChangeToken)];
+                    case 1:
+                        updatedUser = _a.sent();
+                        return [2 /*return*/, updatedUser];
+                }
+            });
+        });
+    };
+    AuthController.prototype.changeUserPassword = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data, id, isChanged;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        data = req.body;
+                        id = req.user.id;
+                        return [4 /*yield*/, this.authService.changePassword(id, data)];
+                    case 1:
+                        isChanged = _a.sent();
+                        return [2 /*return*/, isChanged];
                 }
             });
         });
@@ -204,6 +261,6 @@ var AuthController = /** @class */ (function () {
     return AuthController;
 }());
 exports.AuthController = AuthController;
-var authController = new AuthController(new auth_service_1.default(), new email_service_1.default());
+var authController = new AuthController(new auth_service_1.default(), new email_service_1.default(), new user_service_1.default());
 exports.default = authController;
 //# sourceMappingURL=auth.controller.js.map

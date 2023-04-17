@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var products_route_1 = __importDefault(require("./api/products.route"));
-var categories_route_1 = __importDefault(require("./api/categories.route"));
-var orders_route_1 = __importDefault(require("./api/orders.route"));
-var reviews_route_1 = __importDefault(require("./api/reviews.route"));
-var transactions_route_1 = __importDefault(require("./api/transactions.route"));
+var product_route_1 = __importDefault(require("./api/product.route"));
+var category_route_1 = __importDefault(require("./api/category.route"));
+var order_route_1 = __importDefault(require("./api/order.route"));
+var review_route_1 = __importDefault(require("./api/review.route"));
 var auth_route_1 = __importDefault(require("./api/auth.route"));
+var user_route_1 = __importDefault(require("./api/user.route"));
 var AppRouter = /** @class */ (function () {
     function AppRouter(app) {
         this.app = app;
@@ -17,12 +17,12 @@ var AppRouter = /** @class */ (function () {
         this.app.get("/", function (_req, res) {
             res.send("API Running");
         });
-        this.app.use("/api/products", products_route_1.default);
-        this.app.use("/api/categories", categories_route_1.default);
-        this.app.use("/api/orders", orders_route_1.default);
-        this.app.use("/api/reviews", reviews_route_1.default);
-        this.app.use("/api/transactions", transactions_route_1.default);
+        this.app.use("/api/products", product_route_1.default);
+        this.app.use("/api/categories", category_route_1.default);
+        this.app.use("/api/orders", order_route_1.default);
+        this.app.use("/api/reviews", review_route_1.default);
         this.app.use("/api/auth", auth_route_1.default);
+        this.app.use("/api/user", user_route_1.default);
     };
     return AppRouter;
 }());
