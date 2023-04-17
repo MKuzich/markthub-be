@@ -13,6 +13,7 @@ export interface IReview {
 export interface IReviewPagination extends ParamsDictionary {
   page: string;
   limit: string;
+  sort: string;
 }
 
 export interface IReviewFilter {

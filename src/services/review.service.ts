@@ -6,10 +6,20 @@ import {
   IReviewQuery,
 } from "../types/review.type";
 import { checkOwner } from "../helpers/checkOwner";
+import { ISortObject } from "../types/product.type";
 
 export default class ReviewService {
-  async findAll(query: IReviewQuery, skip: number, limit: number) {
-    const reviews = await Review.find(query).skip(skip).limit(limit);
+  async findAll(
+    query: IReviewQuery,
+    skip: number,
+    limit: number,
+    sort: ISortObject | undefined
+  ) {
+    const reviewQuery = Review.find(query).sort({ date: "desc" });
+    if (sort) {
+      reviewQuery.sort(sort);
+    }
+    const reviews = await reviewQuery.skip(skip).limit(limit);
     const total = await Review.find(query).countDocuments();
     return { reviews, total };
   }

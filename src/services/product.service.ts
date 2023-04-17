@@ -22,12 +22,11 @@ export default class ProductService {
     sort: ISortObject | undefined
   ) {
     const productsQuery = Product.find(query).sort({ date: "desc" });
-    const countQuery = Product.find(query).countDocuments();
     if (sort) {
       productsQuery.sort(sort);
     }
     const products = await productsQuery.skip(skip).limit(limit);
-    const total = await countQuery;
+    const total = await Product.find(query).countDocuments();
     return { products, total };
   }
 

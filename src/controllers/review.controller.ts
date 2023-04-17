@@ -6,6 +6,7 @@ import { IUserTokenPayload } from "../types/user.type";
 import ProductService from "../services/product.service";
 import UserService from "../services/user.service";
 import { buildReviewQuery } from "../helpers/buildReviewQuery";
+import { parseSortParameter } from "../helpers/parseSortParameter";
 
 class ReviewController {
   constructor(
@@ -15,11 +16,12 @@ class ReviewController {
   ) {}
 
   async getReviews(req: IRequest<any, IReviewsQuery, any, any>) {
-    const { page = 1, limit = 3 } = req.query;
+    const { page = 1, limit = 3, sort = undefined } = req.query;
     const skip = (page - 1) * limit;
     const filter = req.query;
     const query = buildReviewQuery(filter);
-    const data = await this.reviewService.findAll(query, skip, limit);
+    const sortObj = parseSortParameter(sort);
+    const data = await this.reviewService.findAll(query, skip, limit, sortObj);
     return data;
   }
 
