@@ -60,6 +60,7 @@ export interface IOrderChange {
 export interface IOrderPagination extends ParamsDictionary {
   page: string;
   limit: string;
+  sort: string;
 }
 
 export interface IOrderFilter {

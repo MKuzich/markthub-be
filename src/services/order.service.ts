@@ -2,10 +2,20 @@ import { createError } from "../helpers/errors";
 import Order from "../models/Order";
 import { IOrderChange, IOrderCreate, IOrderQuery } from "../types/order.type";
 import { checkOwner } from "../helpers/checkOwner";
+import { ISortObject } from "../types/product.type";
 
 export default class OrderService {
-  async findAll(query: IOrderQuery, skip: number, limit: number) {
-    const orders = Order.find(query).skip(skip).limit(limit);
+  async findAll(
+    query: IOrderQuery,
+    skip: number,
+    limit: number,
+    sort: ISortObject | undefined
+  ) {
+    const orderQuery = Order.find(query).sort({ createdAt: "desc" });
+    if (sort) {
+      orderQuery.sort(sort);
+    }
+    const orders = await orderQuery.skip(skip).limit(limit);
     const total = await Order.find(query).countDocuments();
     return { orders, total };
   }

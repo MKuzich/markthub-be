@@ -6,6 +6,7 @@ import { IUserTokenPayload } from "../types/user.type";
 import { IRequest } from "../types/request.type";
 import { IOrdersQuery } from "../types/order.type";
 import { buildOrderQuery } from "../helpers/buildOrderQuery";
+import { parseSortParameter } from "../helpers/parseSortParameter";
 
 class OrderController {
   constructor(
@@ -15,12 +16,13 @@ class OrderController {
   ) {}
 
   async getOrders(req: IRequest<any, IOrdersQuery, any, any>) {
-    const { page = 1, limit = 3 } = req.query;
+    const { page = 1, limit = 3, sort = undefined } = req.query;
     const { id } = req.user as IUserTokenPayload;
     const skip = (page - 1) * limit;
     const filter = req.query;
     const query = buildOrderQuery(filter, id);
-    const orders = await this.orderService.findAll(query, skip, limit);
+    const sortObj = parseSortParameter(sort);
+    const orders = await this.orderService.findAll(query, skip, limit, sortObj);
     return orders;
   }
 
