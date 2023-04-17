@@ -2,6 +2,8 @@ import { Router } from "express";
 import auth from "../../middlewares/authValidate.middleware";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
 import orderController from "../../controllers/order.controller";
+import { validateRequest } from "../../middlewares/validateRequest.middleware";
+import { createOrderSchema, changeOrderSchema } from "../../models/Order";
 
 const orderRouter: Router = Router();
 
@@ -20,12 +22,14 @@ orderRouter.get(
 orderRouter.post(
   "/",
   auth,
+  validateRequest(createOrderSchema),
   tryCatch(orderController.addOrder.bind(orderController))
 );
 
 orderRouter.patch(
   "/:id",
   auth,
+  validateRequest(changeOrderSchema),
   tryCatch(orderController.changeOrder.bind(orderController))
 );
 

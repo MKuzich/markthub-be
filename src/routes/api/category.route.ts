@@ -1,6 +1,9 @@
 import { Router } from "express";
 import categoryController from "../../controllers/category.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
+import { validateRequest } from "../../middlewares/validateRequest.middleware";
+import { createCategorySchema } from "../../models/Category";
+import auth from "../../middlewares/authValidate.middleware";
 
 const categoryRouter: Router = Router();
 
@@ -16,6 +19,8 @@ categoryRouter.get(
 
 categoryRouter.post(
   "/",
+  auth,
+  validateRequest(createCategorySchema),
   tryCatch(categoryController.addCategory.bind(categoryController))
 );
 

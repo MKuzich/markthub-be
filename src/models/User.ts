@@ -39,9 +39,28 @@ export const changeUserDataSchema = Joi.object({
   image: Joi.string().allow(null),
 });
 
+export const verifyEmailSchema = Joi.object({
+  email: Joi.string()
+    .email()
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+    .required(),
+});
+
+export const setNewPasswordSchema = Joi.object({
+  newPassword: Joi.string()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required(),
+});
+
 export const changeUserPasswordSchema = Joi.object({
   oldPassword: Joi.string().required(),
-  newPassword: Joi.string().required(),
+  newPassword: Joi.string()
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+    )
+    .required(),
 });
 
 export const userLogInSchema = Joi.object({

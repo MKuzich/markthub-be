@@ -3,6 +3,11 @@ import productsController from "../../controllers/products.controller";
 import { tryCatch } from "../../middlewares/tryCatch.middleware";
 import { parseFormData } from "../../middlewares/parseFormData";
 import auth from "../../middlewares/authValidate.middleware";
+import { validateRequest } from "../../middlewares/validateRequest.middleware";
+import {
+  createProductSchema,
+  changeProductDataSchema,
+} from "../../models/Product";
 
 const productRouter: Router = Router();
 
@@ -20,12 +25,14 @@ productRouter.post(
   "/",
   auth,
   parseFormData(),
+  validateRequest(createProductSchema),
   tryCatch(productsController.addProduct.bind(productsController))
 );
 
 productRouter.patch(
   "/:productId",
   auth,
+  validateRequest(changeProductDataSchema),
   tryCatch(productsController.changeProduct.bind(productsController))
 );
 
