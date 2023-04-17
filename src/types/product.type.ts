@@ -80,9 +80,14 @@ export interface IProductOrdered {
   reviews: string[];
 }
 
+export interface ISortObject {
+  [key: string]: "asc" | "desc";
+}
+
 export interface IProductPagination extends ParamsDictionary {
   page: string;
   limit: string;
+  sort: string; //key1:asc,key2:desc,key3:asc
 }
 
 export interface IProductFilter {

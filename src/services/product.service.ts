@@ -10,13 +10,24 @@ import {
 import { IFile } from "../types/file.type";
 import { createError } from "../helpers/errors";
 import { checkOwner } from "../helpers/checkOwner";
+import { ISortObject } from "../types/product.type";
 
 const { AZURE_STORAGE_CONNECTION_STRING } = process.env;
 
 export default class ProductService {
-  async findAll(query: IProductQuery, skip: number, limit: number) {
-    const products = await Product.find(query).skip(skip).limit(limit);
-    const total = await Product.find(query).countDocuments();
+  async findAll(
+    query: IProductQuery,
+    skip: number,
+    limit: number,
+    sort: ISortObject | undefined
+  ) {
+    const productsQuery = Product.find(query).sort({ date: "desc" });
+    const countQuery = Product.find(query).countDocuments();
+    if (sort) {
+      productsQuery.sort(sort);
+    }
+    const products = await productsQuery.skip(skip).limit(limit);
+    const total = await countQuery;
     return { products, total };
   }
 

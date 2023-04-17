@@ -12,6 +12,7 @@ import { IRequest } from "../types/request.type";
 import { IFile } from "../types/file.type";
 import { IUserTokenPayload } from "../types/user.type";
 import { buildProductQuery } from "../helpers/buildProductQuery";
+import { parseSortParameter } from "../helpers/parseSortParameter";
 
 class ProductController {
   constructor(
@@ -23,11 +24,12 @@ class ProductController {
   async getProducts(
     req: IRequest<any, IProductsQuery, any, any>
   ): Promise<{ products: IProduct[]; total: number }> {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, sort = undefined } = req.query;
     const skip = (page - 1) * limit;
     const filter = req.query;
     const query = buildProductQuery(filter);
-    const data = await this.productService.findAll(query, skip, limit);
+    const sortObj = parseSortParameter(sort);
+    const data = await this.productService.findAll(query, skip, limit, sortObj);
     return data;
   }
 
