@@ -14,7 +14,7 @@ categoryRouter.get(
 
 categoryRouter.get(
   "/:categoryId",
-  tryCatch(categoryController.getCategories.bind(categoryController))
+  tryCatch(categoryController.getGategoryById.bind(categoryController))
 );
 
 categoryRouter.post(
