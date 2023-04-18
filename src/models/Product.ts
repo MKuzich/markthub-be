@@ -27,7 +27,6 @@ export const changeProductDataSchema = Joi.object({
     }
     return value;
   }),
-  images: Joi.array().items(Joi.string()),
   price: Joi.number(),
   promoPrice: Joi.number(),
   description: Joi.string(),

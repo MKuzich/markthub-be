@@ -30,7 +30,6 @@ exports.changeProductDataSchema = joi_1.default.object({
         }
         return value;
     }),
-    images: joi_1.default.array().items(joi_1.default.string()),
     price: joi_1.default.number(),
     promoPrice: joi_1.default.number(),
     description: joi_1.default.string(),

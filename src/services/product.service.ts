@@ -101,7 +101,7 @@ export default class ProductService {
     return orderedProducts;
   }
 
-  async addReview(productId: string, reviewId: string) {
+  async addReview(productId: Types.ObjectId, reviewId: string) {
     const product = await Product.findByIdAndUpdate(
       productId,
       {
@@ -115,7 +115,7 @@ export default class ProductService {
     return true;
   }
 
-  async deleteReview(productId: string, reviewId: string) {
+  async deleteReview(productId: Types.ObjectId, reviewId: string) {
     const product = await Product.findByIdAndUpdate(
       productId,
       {

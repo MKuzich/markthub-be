@@ -132,11 +132,11 @@ var userSchema = new mongoose_1.Schema({
         },
         totalPrice: {
             type: Number,
-            required: true,
+            default: 0,
         },
         priceWithoutPromo: {
             type: Number,
-            required: true,
+            default: 0,
         },
     },
     orders: {

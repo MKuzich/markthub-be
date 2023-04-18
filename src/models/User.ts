@@ -141,11 +141,11 @@ const userSchema = new Schema<IUser>({
     },
     totalPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
     priceWithoutPromo: {
       type: Number,
-      required: true,
+      default: 0,
     },
   },
   orders: {
