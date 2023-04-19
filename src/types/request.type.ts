@@ -4,8 +4,8 @@ import { ParamsDictionary, Query } from "express-serve-static-core";
 export interface IRequest<
   B,
   P extends ParamsDictionary,
-  Q extends Query,
-  F = Express.Multer.File[]
+  Q extends Query
+  // F = Express.Multer.File[]
 > extends Request {
   body: B;
   params: P;
