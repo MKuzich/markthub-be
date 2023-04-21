@@ -16,4 +16,10 @@ userRouter.patch(
   tryCatch(userController.changeUserData.bind(userController))
 );
 
+userRouter.get(
+  "/current",
+  auth,
+  tryCatch(userController.getCurrentUser.bind(userController))
+);
+
 export default userRouter;

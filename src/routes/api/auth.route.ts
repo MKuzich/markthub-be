@@ -14,12 +14,6 @@ import {
 
 const authRouter: Router = Router();
 
-authRouter.get(
-  "/current",
-  auth,
-  tryCatch(authController.getCurrentUser.bind(authController))
-);
-
 authRouter.post(
   "/signup",
   parseAvatar(),
@@ -45,7 +39,7 @@ authRouter.get(
 );
 
 authRouter.patch(
-  "/verify/",
+  "/verify",
   validateRequest(verifyEmailSchema),
   tryCatch(authController.reVerifyUser.bind(authController))
 );

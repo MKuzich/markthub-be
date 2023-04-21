@@ -1,4 +1,4 @@
-export interface IFile {
+export interface IFile extends Express.Multer.File {
   fieldname: string;
   originalname: string;
   encoding: string;

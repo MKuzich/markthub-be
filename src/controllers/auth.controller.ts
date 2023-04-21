@@ -63,16 +63,6 @@ export class AuthController {
     return;
   }
 
-  async getCurrentUser(req: Request) {
-    if (!req.user) {
-      throw createError(401, "Not authorized.");
-    }
-    const { id } = req.user as IUserTokenPayload;
-    const user = await this.userService.getCurrent(id);
-
-    return user;
-  }
-
   async logOutUser(req: Request) {
     if (!req.user) {
       throw createError(401, "Not authorized.");

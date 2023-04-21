@@ -135,24 +135,6 @@ var AuthController = /** @class */ (function () {
             });
         });
     };
-    AuthController.prototype.getCurrentUser = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var id, user;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!req.user) {
-                            throw (0, errors_1.createError)(401, "Not authorized.");
-                        }
-                        id = req.user.id;
-                        return [4 /*yield*/, this.userService.getCurrent(id)];
-                    case 1:
-                        user = _a.sent();
-                        return [2 /*return*/, user];
-                }
-            });
-        });
-    };
     AuthController.prototype.logOutUser = function (req) {
         return __awaiter(this, void 0, void 0, function () {
             var id, isLogOuted;

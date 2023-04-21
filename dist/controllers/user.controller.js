@@ -41,6 +41,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 var user_service_1 = __importDefault(require("../services/user.service"));
+var errors_1 = require("../helpers/errors");
 var UserController = /** @class */ (function () {
     function UserController(userService) {
         this.userService = userService;
@@ -59,6 +60,24 @@ var UserController = /** @class */ (function () {
                     case 1:
                         isChanged = _b.sent();
                         return [2 /*return*/, isChanged];
+                }
+            });
+        });
+    };
+    UserController.prototype.getCurrentUser = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id, user;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!req.user) {
+                            throw (0, errors_1.createError)(401, "Not authorized.");
+                        }
+                        id = req.user.id;
+                        return [4 /*yield*/, this.userService.getCurrent(id)];
+                    case 1:
+                        user = _a.sent();
+                        return [2 /*return*/, user];
                 }
             });
         });
