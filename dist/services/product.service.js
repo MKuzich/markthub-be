@@ -105,7 +105,7 @@ var ProductService = /** @class */ (function () {
                         blobServiceClient = storage_blob_1.BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
                         containerClient = blobServiceClient.getContainerClient(containerName);
                         uploads = files;
-                        if (!(uploads && uploads.length > 0)) return [3 /*break*/, 4];
+                        if (!(uploads && uploads.length > 0)) return [3 /*break*/, 5];
                         _i = 0, uploads_1 = uploads;
                         _a.label = 1;
                     case 1:
@@ -119,13 +119,15 @@ var ProductService = /** @class */ (function () {
                     case 2:
                         _a.sent();
                         images.push(blobClient.url);
-                        newProduct.images = images;
                         _a.label = 3;
                     case 3:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 4: return [4 /*yield*/, Product_1.default.create(newProduct)];
-                    case 5:
+                    case 4:
+                        newProduct.images = images;
+                        _a.label = 5;
+                    case 5: return [4 /*yield*/, Product_1.default.create(newProduct)];
+                    case 6:
                         data = _a.sent();
                         return [2 /*return*/, data];
                 }

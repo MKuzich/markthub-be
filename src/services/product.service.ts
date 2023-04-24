@@ -45,6 +45,7 @@ export default class ProductService {
     );
     const containerClient = blobServiceClient.getContainerClient(containerName);
     const uploads = files;
+
     if (uploads && uploads.length > 0) {
       for (const upload of uploads) {
         const filename = uuidv4() + "-" + upload.originalname;
@@ -53,8 +54,8 @@ export default class ProductService {
           blobHTTPHeaders: { blobContentType: upload.mimetype },
         });
         images.push(blobClient.url);
-        newProduct.images = images;
       }
+      newProduct.images = images;
     }
     const data = await Product.create(newProduct);
     return data;
